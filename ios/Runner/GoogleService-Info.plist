@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.295791005487-v67sq57foko3mg455c5n9dssrhs5005l</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>295791005487-ivot3tn3dise12t36510c475j6125iaf.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCOD5voM-8YG7RTXNTM5v_-KGqNd21WyjI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>295791005487</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.almehdi.onlineschool</string>
+	<key>PROJECT_ID</key>
+	<string>sample-firebase-ai-app-456c6</string>
+	<key>STORAGE_BUCKET</key>
+	<string>sample-firebase-ai-app-456c6.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:295791005487:ios:d4cf71f8ee05688c6a1bda</string>
+</dict>
+</plist>

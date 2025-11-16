@@ -1,0 +1,75 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "sample-firebase-ai-app-456c6",
+          "appId": "1:295791005487:android:7ca6fd9cee014be86a1bda",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "sample-firebase-ai-app-456c6",
+          "configurations": {
+            "android": "1:295791005487:android:7ca6fd9cee014be86a1bda",
+            "ios": "1:295791005487:ios:d4cf71f8ee05688c6a1bda",
+            "macos": "1:295791005487:ios:d4cf71f8ee05688c6a1bda",
+            "web": "1:295791005487:web:6a550067901b187b6a1bda",
+            "windows": "1:295791005487:web:b3a387429bdf77896a1bda"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "indexes": "firebase.indexes.json"
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ],
+    "headers": [
+      {
+        "source": "/firebase-messaging-sw.js",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      }
+      ,
+      {
+        "source": "/index.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      },
+      {
+        "source": "/assets/icon/favicon.png",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      }
+    ]
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+      ]
+    }
+  ]
+}
