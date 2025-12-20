@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'assign_students.dart';
-import 'assign_teachers.dart';
-import '../../../constants/colors.dart';
 import 'package:al_mehdi_online_school/components/admin_sidebar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+import '../../../constants/colors.dart';
 import '../admin_home_screen.dart';
+import 'assign_students.dart';
 
 class TeachersDetails extends StatelessWidget {
   final Map<String, dynamic> user;
@@ -244,8 +244,7 @@ class TeachersDetails extends StatelessWidget {
                                   Navigator.pushAndRemoveUntil(
                                     context,
                                     MaterialPageRoute(
-                                      builder:
-                                          (context) => AdminHomeScreen(),
+                                      builder: (context) => AdminHomeScreen(),
                                     ),
                                     (route) => false,
                                   );
@@ -421,8 +420,7 @@ class TeachersDetails extends StatelessWidget {
                                 Navigator.pushAndRemoveUntil(
                                   context,
                                   MaterialPageRoute(
-                                    builder:
-                                        (context) => AdminHomeScreen(),
+                                    builder: (context) => AdminHomeScreen(),
                                   ),
                                   (route) => false,
                                 );

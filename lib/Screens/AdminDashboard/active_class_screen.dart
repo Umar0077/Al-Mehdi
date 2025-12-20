@@ -1,12 +1,9 @@
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_home_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:al_mehdi_online_school/components/admin_sidebar.dart';
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/notifications.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'active_class_provider.dart';
-import 'notification_screen.dart';
 import 'notifications_provider.dart';
 
 class ActiveClassScreen extends StatelessWidget {
@@ -70,14 +67,18 @@ class ActiveClassScreen extends StatelessWidget {
                                   const SizedBox(width: 16),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Student: \t\t${data['studentName'] ?? 'N/A'}',
                                           style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 16.0,
-                                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge?.color,
                                           ),
                                         ),
                                         SizedBox(height: 6),
@@ -86,7 +87,10 @@ class ActiveClassScreen extends StatelessWidget {
                                           style: TextStyle(
                                             fontWeight: FontWeight.w500,
                                             fontSize: 13.0,
-                                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge?.color,
                                           ),
                                         ),
                                         SizedBox(height: 6),
@@ -95,7 +99,10 @@ class ActiveClassScreen extends StatelessWidget {
                                           style: TextStyle(
                                             fontWeight: FontWeight.w400,
                                             fontSize: 13.0,
-                                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                                            color:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.bodyLarge?.color,
                                           ),
                                         ),
                                       ],
@@ -237,7 +244,10 @@ class ActiveClassScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14.0,
-                                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                   SizedBox(height: 4),
@@ -246,7 +256,10 @@ class ActiveClassScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.w500,
                                       fontSize: 14.0,
-                                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                   SizedBox(height: 4),
@@ -255,7 +268,10 @@ class ActiveClassScreen extends StatelessWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.w400,
                                       fontSize: 14.0,
-                                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
                                     ),
                                   ),
                                 ],

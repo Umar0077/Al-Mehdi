@@ -1,20 +1,17 @@
 import 'package:al_mehdi_online_school/students/components/student_navbar.dart';
-import 'package:al_mehdi_online_school/students/student_chat/student_chat_mobile.dart';
-import 'package:al_mehdi_online_school/students/student_classes/student_classes_mobile.dart';
-import 'package:al_mehdi_online_school/students/student_profile/student_profile_mobile.dart';
-import 'package:al_mehdi_online_school/students/student_settings/student_settings_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'student_main_screen_provider.dart';
+
 import '../student_chat/student_chat.dart';
 import '../student_classes/student_classes.dart';
 import '../student_home_screen/student_home_screen_mobile.dart';
 import '../student_profile/student_profile.dart';
 import '../student_settings/student_settings.dart';
+import 'student_main_screen_provider.dart';
 
 class StudentMainScreen extends StatelessWidget {
   final int initialIndex;
-  const StudentMainScreen({Key? key, this.initialIndex = 0}) : super(key: key);
+  const StudentMainScreen({super.key, this.initialIndex = 0});
 
   final List<Widget> _screens = const [
     StudentHomeScreenMobile(),
@@ -39,7 +36,10 @@ class StudentMainScreen extends StatelessWidget {
               return true;
             },
             child: Scaffold(
-              body: IndexedStack(index: provider.selectedIndex, children: _screens),
+              body: IndexedStack(
+                index: provider.selectedIndex,
+                children: _screens,
+              ),
               bottomNavigationBar: StudentNavbar(
                 selectedIndex: provider.selectedIndex,
                 onItemTapped: provider.setIndex,

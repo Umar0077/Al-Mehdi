@@ -1,26 +1,28 @@
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_home_screen.dart';
-import 'package:al_mehdi_online_school/providers/admin_main_screen_provider.dart';
 import 'package:al_mehdi_online_school/Screens/Auth%20Screens/login_screen.dart';
 import 'package:al_mehdi_online_school/constants/colors.dart';
+import 'package:al_mehdi_online_school/providers/admin_main_screen_provider.dart';
+import 'package:al_mehdi_online_school/services/deep_link_service.dart';
+import 'package:al_mehdi_online_school/services/remote_config_service.dart';
 import 'package:al_mehdi_online_school/services/session_helper.dart';
 import 'package:al_mehdi_online_school/services/theme_service.dart';
 import 'package:al_mehdi_online_school/students/student_home_screen/student_home_screen.dart';
 import 'package:al_mehdi_online_school/teachers/teacher_home_screen/teacher_home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart'
     show Persistence;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'Screens/AdminDashboard/admin_home_provider.dart';
-import 'firebase_options.dart'; // ✅ Import generated config
-import 'Screens/StartingScreens/splash_screen.dart';
-import 'services/notification_service.dart';
 import 'package:provider/provider.dart';
-import 'Screens/StartingScreens/onboarding_screen.dart';
+
+import 'Screens/AdminDashboard/admin_home_provider.dart';
 import 'Screens/Auth Screens/Main_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'Screens/StartingScreens/onboarding_screen.dart';
+import 'Screens/StartingScreens/splash_screen.dart';
+import 'firebase_options.dart'; // ✅ Import generated config
+import 'services/notification_service.dart';
 import 'services/onboarding_service.dart';
 
 // ✅ Global theme notifier
@@ -30,8 +32,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Initialize Remote Config Service
+  await RemoteConfigService.instance.initialize();
+
   if (kIsWeb) {
     await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+
+    // Initialize Deep Link Service with Remote Config values
+    DeepLinkService.initialize();
+
+    // Optional: Print config values in debug mode
+    if (kDebugMode) {
+      print('🔧 Remote Config Values:');
+      RemoteConfigService.instance.printAllValues();
+    }
   }
 
   runApp(
@@ -39,7 +53,9 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => OnboardingProvider()),
         ChangeNotifierProvider(create: (_) => AdminMainScreenProvider()),
-        ChangeNotifierProvider(create: (_) => AdminHomeProvider()), // <-- Add this line
+        ChangeNotifierProvider(
+          create: (_) => AdminHomeProvider(),
+        ), // <-- Add this line
       ],
       child: const MyApp(),
     ),
@@ -182,12 +198,14 @@ class _AppInitializerState extends State<AppInitializer> {
       // Validate admin session (optional: check if session is not too old)
       final loginTime = await getAdminLoginTime();
       final adminEmail = await getAdminEmail();
-      
+
       if (loginTime != null && adminEmail != null) {
         // Check if session is valid (e.g., not older than 30 days)
         final sessionAge = DateTime.now().difference(loginTime).inDays;
         if (sessionAge < 30) {
-          print('Valid admin session found. Email: $adminEmail, Login time: $loginTime');
+          print(
+            'Valid admin session found. Email: $adminEmail, Login time: $loginTime',
+          );
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => AdminHomeScreen()),
@@ -200,19 +218,21 @@ class _AppInitializerState extends State<AppInitializer> {
         }
       }
     }
-    
+
     // Check if user has seen onboarding
-    final hasSeenOnboarding = await OnboardingService.instance.hasSeenOnboarding();
-    
+    final hasSeenOnboarding =
+        await OnboardingService.instance.hasSeenOnboarding();
+
     final user = FirebaseAuth.instance.currentUser;
-    
+
     if (kIsWeb) {
       if (user != null) {
         // User is logged in, check role and navigate to appropriate home screen
-        final studentDoc = await FirebaseFirestore.instance
-            .collection('students')
-            .doc(user.uid)
-            .get();
+        final studentDoc =
+            await FirebaseFirestore.instance
+                .collection('students')
+                .doc(user.uid)
+                .get();
         if (studentDoc.exists) {
           Navigator.pushReplacement(
             context,
@@ -220,10 +240,11 @@ class _AppInitializerState extends State<AppInitializer> {
           );
           return;
         }
-        final teacherDoc = await FirebaseFirestore.instance
-            .collection('teachers')
-            .doc(user.uid)
-            .get();
+        final teacherDoc =
+            await FirebaseFirestore.instance
+                .collection('teachers')
+                .doc(user.uid)
+                .get();
         if (teacherDoc.exists) {
           Navigator.pushReplacement(
             context,
@@ -243,10 +264,11 @@ class _AppInitializerState extends State<AppInitializer> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ChangeNotifierProvider(
-                create: (_) => OnboardingProvider(),
-                child: const OnboardingScreen(),
-              ),
+              builder:
+                  (context) => ChangeNotifierProvider(
+                    create: (_) => OnboardingProvider(),
+                    child: const OnboardingScreen(),
+                  ),
             ),
           );
         } else {
@@ -272,10 +294,11 @@ class _AppInitializerState extends State<AppInitializer> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ChangeNotifierProvider(
-                create: (_) => OnboardingProvider(),
-                child: const OnboardingScreen(),
-              ),
+              builder:
+                  (context) => ChangeNotifierProvider(
+                    create: (_) => OnboardingProvider(),
+                    child: const OnboardingScreen(),
+                  ),
             ),
           );
         } else {

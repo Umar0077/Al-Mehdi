@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:al_mehdi_online_school/constants/colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class AdminDashboardSummary extends StatelessWidget {
-  const AdminDashboardSummary({Key? key}) : super(key: key);
+  const AdminDashboardSummary({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,11 @@ class AdminDashboardSummary extends StatelessWidget {
     );
 
     Widget activeClassCard = StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('classes').where('status', isEqualTo: 'active').snapshots(),
+      stream:
+          FirebaseFirestore.instance
+              .collection('classes')
+              .where('status', isEqualTo: 'active')
+              .snapshots(),
       builder: (context, snapshot) {
         String count = '...';
         if (snapshot.hasData) {
@@ -56,16 +60,24 @@ class AdminDashboardSummary extends StatelessWidget {
             if (teacherSnapshot.hasData && studentSnapshot.hasData) {
               final teachers = teacherSnapshot.data!.docs;
               final students = studentSnapshot.data!.docs;
-              final unassignedTeachers = teachers.where((doc) {
-                final data = doc.data() as Map<String, dynamic>?;
-                final ids = data != null && data.containsKey('assignedStudentId') ? data['assignedStudentId'] : null;
-                return ids == null || (ids is List && ids.isEmpty);
-              }).length;
-              final unassignedStudents = students.where((doc) {
-                final data = doc.data() as Map<String, dynamic>?;
-                final tid = data != null && data.containsKey('assignedTeacherId') ? data['assignedTeacherId'] : null;
-                return tid == null || (tid is String && tid.isEmpty);
-              }).length;
+              final unassignedTeachers =
+                  teachers.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>?;
+                    final ids =
+                        data != null && data.containsKey('assignedStudentId')
+                            ? data['assignedStudentId']
+                            : null;
+                    return ids == null || (ids is List && ids.isEmpty);
+                  }).length;
+              final unassignedStudents =
+                  students.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>?;
+                    final tid =
+                        data != null && data.containsKey('assignedTeacherId')
+                            ? data['assignedTeacherId']
+                            : null;
+                    return tid == null || (tid is String && tid.isEmpty);
+                  }).length;
               total = (unassignedTeachers + unassignedStudents).toString();
             }
             return _infoCard(
@@ -79,8 +91,8 @@ class AdminDashboardSummary extends StatelessWidget {
       },
     );
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWeb = screenWidth >= 900;
+    // final screenWidth = MediaQuery.of(context).size.width;
+    // final isWeb = screenWidth >= 900;
 
     return ListView(
       children: [
@@ -89,11 +101,7 @@ class AdminDashboardSummary extends StatelessWidget {
           children: [
             Row(
               children: [
-                Image.asset(
-                  'assets/logo/Frame.png',
-                  width: 36,
-                  height: 36,
-                ),
+                Image.asset('assets/logo/Frame.png', width: 36, height: 36),
                 const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,18 +136,9 @@ class AdminDashboardSummary extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      width: cardWidth,
-                      child: activeClassCard,
-                    ),
-                    SizedBox(
-                      width: cardWidth,
-                      child: totalUsersCard,
-                    ),
-                    SizedBox(
-                      width: cardWidth,
-                      child: unassignedUsersCard,
-                    ),
+                    SizedBox(width: cardWidth, child: activeClassCard),
+                    SizedBox(width: cardWidth, child: totalUsersCard),
+                    SizedBox(width: cardWidth, child: unassignedUsersCard),
                     SizedBox(
                       width: cardWidth,
                       child: _infoCard(

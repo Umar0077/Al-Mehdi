@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../components/admin_sidebar.dart';
+
 import '../../../constants/colors.dart';
 import 'Teachers_details.dart';
-import '../admin_home_screen.dart';
-import '../../../services/notification_service.dart';
 import 'assign_teachers_provider.dart';
 
 class AssignTeachers extends StatelessWidget {
@@ -22,7 +20,9 @@ class AssignTeachers extends StatelessWidget {
           final isWeb = screenWidth >= 900;
           double labelFontSize = isWeb ? 18 : 14;
 
-          if (provider.loading) return const Center(child: CircularProgressIndicator());
+          if (provider.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
           if (provider.unassignedTeachers.isEmpty) {
             if (provider.loadingAssigned) {
               return const Center(child: CircularProgressIndicator());
@@ -61,21 +61,26 @@ class AssignTeachers extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TeachersDetails(
-                          user: {
-                            'uid': teacher['uid'],
-                            'role': 'Teacher',
-                            'avatar': teacher['avatar'],
-                            ...teacher,
-                          },
-                          isUnassigned: false,
-                          onAssign: studentUid.isNotEmpty
-                              ? () async {
-                                  await provider.assignTeacher(context, teacher);
-                                }
-                              : null,
-                          isFinalAssignment: studentUid.isNotEmpty,
-                        ),
+                        builder:
+                            (context) => TeachersDetails(
+                              user: {
+                                'uid': teacher['uid'],
+                                'role': 'Teacher',
+                                'avatar': teacher['avatar'],
+                                ...teacher,
+                              },
+                              isUnassigned: false,
+                              onAssign:
+                                  studentUid.isNotEmpty
+                                      ? () async {
+                                        await provider.assignTeacher(
+                                          context,
+                                          teacher,
+                                        );
+                                      }
+                                      : null,
+                              isFinalAssignment: studentUid.isNotEmpty,
+                            ),
                       ),
                     );
                   },
@@ -93,9 +98,13 @@ class AssignTeachers extends StatelessWidget {
                       elevation: 0,
                       title: const Text(
                         'Assigned Teachers',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
+                        ),
                       ),
-                      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
                     ),
                     Expanded(
                       child: ListView.builder(
@@ -127,7 +136,10 @@ class AssignTeachers extends StatelessWidget {
                   leading: BackButton(),
                 ),
                 body: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
                   child: ListView.builder(
                     itemCount: provider.assignedTeachers.length,
                     itemBuilder: (context, index) {
@@ -149,7 +161,11 @@ class AssignTeachers extends StatelessWidget {
           ) {
             return GestureDetector(
               onTap: () async {
-                final doc = await FirebaseFirestore.instance.collection('teachers').doc(teacher['uid']).get();
+                final doc =
+                    await FirebaseFirestore.instance
+                        .collection('teachers')
+                        .doc(teacher['uid'])
+                        .get();
                 final data = doc.data() ?? {};
                 final userMap = {
                   'uid': teacher['uid'],
@@ -160,16 +176,21 @@ class AssignTeachers extends StatelessWidget {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TeachersDetails(
-                      user: userMap,
-                      isUnassigned: false,
-                      onAssign: studentUid.isNotEmpty
-                          ? () async {
-                              await provider.assignTeacher(context, teacher);
-                            }
-                          : null,
-                      isFinalAssignment: studentUid.isNotEmpty,
-                    ),
+                    builder:
+                        (context) => TeachersDetails(
+                          user: userMap,
+                          isUnassigned: false,
+                          onAssign:
+                              studentUid.isNotEmpty
+                                  ? () async {
+                                    await provider.assignTeacher(
+                                      context,
+                                      teacher,
+                                    );
+                                  }
+                                  : null,
+                          isFinalAssignment: studentUid.isNotEmpty,
+                        ),
                   ),
                 );
                 if (result == true) {
@@ -186,7 +207,10 @@ class AssignTeachers extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 18,
+                    horizontal: 24,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -199,38 +223,38 @@ class AssignTeachers extends StatelessWidget {
                       ),
                       assigned
                           ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Assigned',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: labelFontSize,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18,
-                              color: appGreen,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.check,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Assigned',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: labelFontSize,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          : const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18,
+                            color: appGreen,
+                          ),
                     ],
                   ),
                 ),
@@ -248,7 +272,10 @@ class AssignTeachers extends StatelessWidget {
                     elevation: 0,
                     title: const Text(
                       'Assign Teachers',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
                     ),
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   ),
@@ -261,7 +288,8 @@ class AssignTeachers extends StatelessWidget {
                       itemCount: provider.unassignedTeachers.length,
                       itemBuilder: (context, index) {
                         final teacher = provider.unassignedTeachers[index];
-                        final assigned = provider.assignedStatus[teacher['name']] ?? false;
+                        final assigned =
+                            provider.assignedStatus[teacher['name']] ?? false;
                         return teacherCard(teacher, assigned, labelFontSize);
                       },
                     ),
@@ -281,12 +309,16 @@ class AssignTeachers extends StatelessWidget {
                 leading: BackButton(),
               ),
               body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
                 child: ListView.builder(
                   itemCount: provider.unassignedTeachers.length,
                   itemBuilder: (context, index) {
                     final teacher = provider.unassignedTeachers[index];
-                    final assigned = provider.assignedStatus[teacher['name']] ?? false;
+                    final assigned =
+                        provider.assignedStatus[teacher['name']] ?? false;
                     return teacherCard(teacher, assigned, labelFontSize);
                   },
                 ),

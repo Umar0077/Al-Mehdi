@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../constants/colors.dart';
+
 import '../../services/notification_service.dart';
 
 // Simple and reliable URL launcher for Jitsi meetings
@@ -20,7 +20,9 @@ Future<void> _launchJitsiMeeting(String url) async {
     try {
       await launchUrl(Uri.parse(url), mode: LaunchMode.platformDefault);
     } catch (e) {
-      throw Exception('Unable to open Jitsi meeting. Please try again or copy the URL manually.');
+      throw Exception(
+        'Unable to open Jitsi meeting. Please try again or copy the URL manually.',
+      );
     }
   }
 }
@@ -157,19 +159,21 @@ class ClassesList extends StatelessWidget {
                             jitsiRoom.isNotEmpty
                                 ? () async {
                                   try {
-                                    final url = 'https://meet.jit.si/$jitsiRoom';
-                                    
+                                    final url =
+                                        'https://meet.jit.si/$jitsiRoom';
+
                                     await _launchJitsiMeeting(url);
-                                    
+
                                     // Update Firestore after successful launch
                                     await FirebaseFirestore.instance
                                         .collection('classes')
                                         .doc(docId)
                                         .update({
                                           'studentJoined': true,
-                                          'studentJoinTime': FieldValue.serverTimestamp(),
+                                          'studentJoinTime':
+                                              FieldValue.serverTimestamp(),
                                         });
-                                    
+
                                     // Send notification to teacher
                                     final teacherId = c['teacherId'] ?? '';
                                     final studentName = c['studentName'] ?? '';
@@ -181,16 +185,28 @@ class ClassesList extends StatelessWidget {
                                         classId: docId,
                                       );
                                     }
-                                    
+
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(content: Text('You have joined the class!')),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'You have joined the class!',
+                                          ),
+                                        ),
                                       );
                                     }
                                   } catch (e) {
                                     if (context.mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Error joining class: $e')),
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            'Error joining class: $e',
+                                          ),
+                                        ),
                                       );
                                     }
                                   }
@@ -204,7 +220,7 @@ class ClassesList extends StatelessWidget {
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
-                            side: BorderSide(color: Colors.transparent)
+                            side: BorderSide(color: Colors.transparent),
                           ),
                         ),
                         child: const Text('Join'),

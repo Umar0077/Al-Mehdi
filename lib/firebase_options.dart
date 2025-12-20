@@ -50,19 +50,21 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC_w6TvSkLm0qDNQmfhhmBBSpme6Md8UCs',
-    appId: '1:295791005487:android:7ca6fd9cee014be86a1bda',
+    apiKey: 'AIzaSyBJGirvpXheVHexKt74_O6hjy3YS4ior-E',
+    appId: '1:295791005487:android:8e61e9811a25154e6a1bda',
     messagingSenderId: '295791005487',
     projectId: 'sample-firebase-ai-app-456c6',
     storageBucket: 'sample-firebase-ai-app-456c6.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCOD5voM-8YG7RTXNTM5v_-KGqNd21WyjI',
-    appId: '1:295791005487:ios:d4cf71f8ee05688c6a1bda',
+    apiKey: 'AIzaSyAVsFLNZnH9ydSgoTAAwTm8E_3n7s0RdUA',
+    appId: '1:295791005487:ios:a077611407a6c9bf6a1bda',
     messagingSenderId: '295791005487',
     projectId: 'sample-firebase-ai-app-456c6',
     storageBucket: 'sample-firebase-ai-app-456c6.firebasestorage.app',
+    androidClientId: '295791005487-ivot3tn3dise12t36510c475j6125iaf.apps.googleusercontent.com',
+    iosClientId: '295791005487-epsbj47r76kp3id081iaj921thttjduc.apps.googleusercontent.com',
     iosBundleId: 'com.almehdi.onlineschool',
   );
 

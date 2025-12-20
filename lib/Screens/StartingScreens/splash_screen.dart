@@ -1,17 +1,5 @@
-import 'dart:async';
 import 'package:al_mehdi_online_school/constants/colors.dart';
 import 'package:flutter/material.dart';
-import '../Auth Screens/login_screen.dart';
-import 'onboarding_screen.dart'; // Import your onboarding screen
-import 'package:flutter/foundation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../students/student_home_screen/student_home_screen.dart';
-import '../../teachers/teacher_home_screen/teacher_home_screen.dart';
-import '../AdminDashboard/admin_home_screen.dart';
-import 'package:al_mehdi_online_school/services/session_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../Auth Screens/Main_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

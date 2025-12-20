@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
+
 import '../../../constants/colors.dart';
-import '../student_notifications/student_notifications.dart';
 import '../../services/notification_service.dart';
+import '../student_notifications/student_notifications.dart';
 import 'student_attendance_web_provider.dart';
 
 class StudentAttendanceWebView extends StatelessWidget {
@@ -42,11 +42,17 @@ class StudentAttendanceWebView extends StatelessWidget {
                             ),
                             const Spacer(),
                             StreamBuilder<QuerySnapshot>(
-                              stream: NotificationService.getNotificationsStream(),
+                              stream:
+                                  NotificationService.getNotificationsStream(),
                               builder: (context, snapshot) {
                                 int unreadCount = 0;
                                 if (snapshot.hasData) {
-                                  unreadCount = snapshot.data!.docs.where((doc) => !(doc['read'] ?? false)).length;
+                                  unreadCount =
+                                      snapshot.data!.docs
+                                          .where(
+                                            (doc) => !(doc['read'] ?? false),
+                                          )
+                                          .length;
                                 }
                                 return Stack(
                                   children: [
@@ -56,7 +62,9 @@ class StudentAttendanceWebView extends StatelessWidget {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => StudentNotificationScreen(),
+                                            builder:
+                                                (context) =>
+                                                    StudentNotificationScreen(),
                                           ),
                                         );
                                       },
@@ -85,83 +93,96 @@ class StudentAttendanceWebView extends StatelessWidget {
                       // Overall Attendance
                       Expanded(
                         child: Center(
-                          child: provider.loading
-                              ? const CircularProgressIndicator()
-                              : provider.error.isNotEmpty
+                          child:
+                              provider.loading
+                                  ? const CircularProgressIndicator()
+                                  : provider.error.isNotEmpty
                                   ? Text('Error: ${provider.error}')
                                   : LayoutBuilder(
-                                      builder: (context, constraints) {
-                                        if (constraints.maxWidth < 900) {
-                                          // Small screen: stack vertically
-                                          return SingleChildScrollView(
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    vertical: 32.0,
-                                                    horizontal: 24,
-                                                  ),
-                                                  child: PieChartSection(
-                                                    x: provider.attended,
-                                                    y: provider.total,
-                                                    missedForChart: provider.missedForChart,
-                                                    percentage: provider.percentage,
-                                                    dataMap: provider.dataMap,
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    vertical: 12,
-                                                    horizontal: 24,
-                                                  ),
-                                                  child: StatCardsSection(
-                                                    y: provider.total,
-                                                    x: provider.attended,
-                                                    missedForCard: provider.missedForCard,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        } else {
-                                          // Large screen: side by side
-                                          return Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
+                                    builder: (context, constraints) {
+                                      if (constraints.maxWidth < 900) {
+                                        // Small screen: stack vertically
+                                        return SingleChildScrollView(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
                                             children: [
                                               Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                  vertical: 50.0,
-                                                  horizontal: 100,
-                                                ),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 32.0,
+                                                      horizontal: 24,
+                                                    ),
                                                 child: PieChartSection(
                                                   x: provider.attended,
                                                   y: provider.total,
-                                                  missedForChart: provider.missedForChart,
-                                                  percentage: provider.percentage,
+                                                  missedForChart:
+                                                      provider.missedForChart,
+                                                  percentage:
+                                                      provider.percentage,
                                                   dataMap: provider.dataMap,
                                                 ),
                                               ),
-                                              const SizedBox(width: 48),
-                                              Expanded(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    vertical: 20,
-                                                    horizontal: 40,
-                                                  ),
-                                                  child: StatCardsSection(
-                                                    y: provider.total,
-                                                    x: provider.attended,
-                                                    missedForCard: provider.missedForCard,
-                                                  ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 12,
+                                                      horizontal: 24,
+                                                    ),
+                                                child: StatCardsSection(
+                                                  y: provider.total,
+                                                  x: provider.attended,
+                                                  missedForCard:
+                                                      provider.missedForCard,
                                                 ),
                                               ),
                                             ],
-                                          );
-                                        }
-                                      },
-                                    ),
+                                          ),
+                                        );
+                                      } else {
+                                        // Large screen: side by side
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    vertical: 50.0,
+                                                    horizontal: 100,
+                                                  ),
+                                              child: PieChartSection(
+                                                x: provider.attended,
+                                                y: provider.total,
+                                                missedForChart:
+                                                    provider.missedForChart,
+                                                percentage: provider.percentage,
+                                                dataMap: provider.dataMap,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 48),
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      vertical: 20,
+                                                      horizontal: 40,
+                                                    ),
+                                                child: StatCardsSection(
+                                                  y: provider.total,
+                                                  x: provider.attended,
+                                                  missedForCard:
+                                                      provider.missedForCard,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      }
+                                    },
+                                  ),
                         ),
                       ),
                     ],

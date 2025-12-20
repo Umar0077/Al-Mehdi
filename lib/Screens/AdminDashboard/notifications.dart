@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../services/notification_service.dart';
+
 import '../../constants/colors.dart';
 import 'notifications_provider.dart';
 
@@ -134,7 +134,8 @@ class _NotificationsView extends StatelessWidget {
                                       ),
                                       onChanged: (_) {
                                         provider.setSearchTerm(
-                                            provider.searchController.text);
+                                          provider.searchController.text,
+                                        );
                                       },
                                     ),
                                   ),
@@ -145,34 +146,60 @@ class _NotificationsView extends StatelessWidget {
                           const SizedBox(height: 20),
                           // Notifications List (real-time)
                           Expanded(
-                            child: provider.isLoading
-                                ? const Center(child: CircularProgressIndicator())
-                                : provider.adminUid == null
-                                    ? const Center(child: Text('Admin not found'))
+                            child:
+                                provider.isLoading
+                                    ? const Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                    : provider.adminUid == null
+                                    ? const Center(
+                                      child: Text('Admin not found'),
+                                    )
                                     : StreamBuilder<QuerySnapshot>(
-                                        stream: provider.notificationsStream,
-                                        builder: (context, snapshot) {
-                                          if (snapshot.connectionState == ConnectionState.waiting) {
-                                            return const Center(child: CircularProgressIndicator());
-                                          }
-                                          if (snapshot.hasError) {
-                                            return Center(child: Text('Error:  ${snapshot.error}'));
-                                          }
-                                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                                            return const Center(child: Text('No notifications yet'));
-                                          }
-                                          final notifications = snapshot.data!.docs;
-                                          final filteredNotifications = provider.filterAndSearch(notifications);
-                                          return ListView.builder(
-                                            itemCount: filteredNotifications.length,
-                                            itemBuilder: (context, index) {
-                                              final doc = filteredNotifications[index];
-                                              final data = doc.data() as Map<String, dynamic>;
-                                              return _buildNotificationCard(context, provider, data, doc.id);
-                                            },
+                                      stream: provider.notificationsStream,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Center(
+                                            child: CircularProgressIndicator(),
                                           );
-                                        },
-                                      ),
+                                        }
+                                        if (snapshot.hasError) {
+                                          return Center(
+                                            child: Text(
+                                              'Error:  ${snapshot.error}',
+                                            ),
+                                          );
+                                        }
+                                        if (!snapshot.hasData ||
+                                            snapshot.data!.docs.isEmpty) {
+                                          return const Center(
+                                            child: Text('No notifications yet'),
+                                          );
+                                        }
+                                        final notifications =
+                                            snapshot.data!.docs;
+                                        final filteredNotifications = provider
+                                            .filterAndSearch(notifications);
+                                        return ListView.builder(
+                                          itemCount:
+                                              filteredNotifications.length,
+                                          itemBuilder: (context, index) {
+                                            final doc =
+                                                filteredNotifications[index];
+                                            final data =
+                                                doc.data()
+                                                    as Map<String, dynamic>;
+                                            return _buildNotificationCard(
+                                              context,
+                                              provider,
+                                              data,
+                                              doc.id,
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
                           ),
                         ],
                       ),
@@ -244,8 +271,12 @@ class _NotificationsView extends StatelessWidget {
                                   return const SizedBox();
                                 }
                                 final notifications = snapshot.data!.docs;
-                                final unreadCount = provider.countUnread(notifications);
-                                final readCount = provider.countRead(notifications);
+                                final unreadCount = provider.countUnread(
+                                  notifications,
+                                );
+                                final readCount = provider.countRead(
+                                  notifications,
+                                );
                                 return Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -256,9 +287,21 @@ class _NotificationsView extends StatelessWidget {
                                       ),
                                     ),
                                     const SizedBox(height: 12),
-                                    _statRow(Icons.error, '$unreadCount Unread', appGreen),
-                                    _statRow(Icons.check_circle, '$readCount Read', appGreen),
-                                    _statRow(Icons.notifications, '${notifications.length} Total', appGreen),
+                                    _statRow(
+                                      Icons.error,
+                                      '$unreadCount Unread',
+                                      appGreen,
+                                    ),
+                                    _statRow(
+                                      Icons.check_circle,
+                                      '$readCount Read',
+                                      appGreen,
+                                    ),
+                                    _statRow(
+                                      Icons.notifications,
+                                      '${notifications.length} Total',
+                                      appGreen,
+                                    ),
                                   ],
                                 );
                               },
@@ -333,35 +376,52 @@ class _NotificationsView extends StatelessWidget {
                     const SizedBox(height: 10),
                     // Notifications list
                     Expanded(
-                      child: provider.isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : provider.adminUid == null
+                      child:
+                          provider.isLoading
+                              ? const Center(child: CircularProgressIndicator())
+                              : provider.adminUid == null
                               ? const Center(child: Text('Admin not found'))
                               : StreamBuilder<QuerySnapshot>(
-                                  stream: provider.notificationsStream,
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.waiting) {
-                                      return const Center(child: CircularProgressIndicator());
-                                    }
-                                    if (snapshot.hasError) {
-                                      return Center(child: Text('Error:  ${snapshot.error}'));
-                                    }
-                                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                                      return const Center(child: Text('No notifications yet'));
-                                    }
-                                    final notifications = snapshot.data!.docs;
-                                    final filteredNotifications = provider.filterAndSearch(notifications);
-                                    return ListView.separated(
-                                      itemCount: filteredNotifications.length,
-                                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                                      itemBuilder: (context, index) {
-                                        final doc = filteredNotifications[index];
-                                        final data = doc.data() as Map<String, dynamic>;
-                                        return _buildNotificationCard(context, provider, data, doc.id);
-                                      },
+                                stream: provider.notificationsStream,
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
                                     );
-                                  },
-                                ),
+                                  }
+                                  if (snapshot.hasError) {
+                                    return Center(
+                                      child: Text('Error:  ${snapshot.error}'),
+                                    );
+                                  }
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.docs.isEmpty) {
+                                    return const Center(
+                                      child: Text('No notifications yet'),
+                                    );
+                                  }
+                                  final notifications = snapshot.data!.docs;
+                                  final filteredNotifications = provider
+                                      .filterAndSearch(notifications);
+                                  return ListView.separated(
+                                    itemCount: filteredNotifications.length,
+                                    separatorBuilder:
+                                        (_, __) => const SizedBox(height: 10),
+                                    itemBuilder: (context, index) {
+                                      final doc = filteredNotifications[index];
+                                      final data =
+                                          doc.data() as Map<String, dynamic>;
+                                      return _buildNotificationCard(
+                                        context,
+                                        provider,
+                                        data,
+                                        doc.id,
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                     ),
                   ],
                 ),
@@ -373,7 +433,11 @@ class _NotificationsView extends StatelessWidget {
     );
   }
 
-  Widget _filterButton(BuildContext context, NotificationsProvider provider, String label) {
+  Widget _filterButton(
+    BuildContext context,
+    NotificationsProvider provider,
+    String label,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: SizedBox(
@@ -404,11 +468,16 @@ class _NotificationsView extends StatelessWidget {
     );
   }
 
-  Widget _buildNotificationCard(BuildContext context, NotificationsProvider provider, Map<String, dynamic> notif, String notificationId) {
+  Widget _buildNotificationCard(
+    BuildContext context,
+    NotificationsProvider provider,
+    Map<String, dynamic> notif,
+    String notificationId,
+  ) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenWidth < 400;
     final isMediumScreen = screenWidth < 600;
-    
+
     return Card(
       elevation: 2,
       shadowColor: Theme.of(context).shadowColor,
@@ -438,7 +507,12 @@ class _NotificationsView extends StatelessWidget {
                       Text(
                         notif['title'] ?? 'Notification',
                         style: TextStyle(
-                          fontSize: isSmallScreen ? 13 : isMediumScreen ? 14 : 15,
+                          fontSize:
+                              isSmallScreen
+                                  ? 13
+                                  : isMediumScreen
+                                  ? 14
+                                  : 15,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 2,
@@ -448,7 +522,12 @@ class _NotificationsView extends StatelessWidget {
                       Text(
                         notif['body'] ?? '',
                         style: TextStyle(
-                          fontSize: isSmallScreen ? 11 : isMediumScreen ? 12 : 14,
+                          fontSize:
+                              isSmallScreen
+                                  ? 11
+                                  : isMediumScreen
+                                  ? 12
+                                  : 14,
                           color: Colors.grey[700],
                         ),
                         maxLines: 3,
@@ -470,14 +549,17 @@ class _NotificationsView extends StatelessWidget {
                       child: Text(
                         provider.formatTime(notif['timestamp'] as Timestamp?),
                         style: TextStyle(
-                          color: Colors.grey[600], 
+                          color: Colors.grey[600],
                           fontSize: isSmallScreen ? 11 : 12,
                         ),
                       ),
                     ),
                     if (notif['read'] == false)
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: appGreen.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
@@ -500,27 +582,27 @@ class _NotificationsView extends StatelessWidget {
                   children: [
                     if (notif['read'] == false)
                       _actionButton(
-                        context, 
-                        'Mark as Read', 
-                        Icons.check_circle, 
+                        context,
+                        'Mark as Read',
+                        Icons.check_circle,
                         appGreen,
                         () => provider.markAsRead(notificationId),
                         isSmallScreen,
                       )
                     else
                       _actionButton(
-                        context, 
-                        'Mark as Unread', 
-                        Icons.radio_button_unchecked, 
+                        context,
+                        'Mark as Unread',
+                        Icons.radio_button_unchecked,
                         appGreen,
                         () => provider.markAsUnread(notificationId),
                         isSmallScreen,
                       ),
                     const SizedBox(width: 12),
                     _actionButton(
-                      context, 
-                      'Delete', 
-                      Icons.delete_outline, 
+                      context,
+                      'Delete',
+                      Icons.delete_outline,
                       appRed,
                       () => provider.deleteNotification(notificationId),
                       isSmallScreen,
@@ -535,7 +617,14 @@ class _NotificationsView extends StatelessWidget {
     );
   }
 
-  Widget _actionButton(BuildContext context, String label, IconData icon, Color color, VoidCallback onTap, bool isSmallScreen) {
+  Widget _actionButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+    bool isSmallScreen,
+  ) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
@@ -551,11 +640,7 @@ class _NotificationsView extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              color: color,
-              size: isSmallScreen ? 14 : 16,
-            ),
+            Icon(icon, color: color, size: isSmallScreen ? 14 : 16),
             const SizedBox(width: 4),
             Text(
               label,

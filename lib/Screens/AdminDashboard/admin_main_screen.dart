@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:al_mehdi_online_school/components/admin_sidebar.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_home_screen.dart';
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_dashboard_summary.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/schedule_class.dart';
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/attendance_screen.dart';
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/chat_screen.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/settings_screen.dart';
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/profile_screen.dart';
-import 'admin_main_provider.dart';
+import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/schedule_class.dart';
+import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/settings_screen.dart';
+import 'package:al_mehdi_online_school/components/admin_sidebar.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'admin_main_provider.dart';
 
 class AdminMainScreen extends StatelessWidget {
   const AdminMainScreen({super.key});

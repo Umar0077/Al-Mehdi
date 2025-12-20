@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_home_screen.dart';
-import '../notifications.dart';
-import 'Teachers_details.dart';
-import 'package:al_mehdi_online_school/components/admin_sidebar.dart';
-import 'assign_teachers.dart';
-import 'assign_students.dart';
-import 'unassigned_users_provider.dart';
-import '../notifications_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import '../notifications.dart';
+import '../notifications_provider.dart';
+import 'Teachers_details.dart';
+import 'assign_students.dart';
+import 'assign_teachers.dart';
+import 'unassigned_users_provider.dart';
 
 class UnassignedUsersScreen extends StatelessWidget {
   const UnassignedUsersScreen({super.key});
@@ -108,13 +107,13 @@ class _UnassignedUsersScreenContent extends StatelessWidget {
     double avatarSize,
     double cardMargin,
   ) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (_, __) async {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => AdminHomeScreen()),
         );
-        return false;
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -123,9 +122,7 @@ class _UnassignedUsersScreenContent extends StatelessWidget {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => AdminHomeScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => AdminHomeScreen()),
               );
             },
           ),
@@ -165,8 +162,10 @@ class UnassignedTeachersList extends StatelessWidget {
       create: (_) => UnassignedUsersProvider(),
       child: Consumer<UnassignedUsersProvider>(
         builder: (context, provider, _) {
-          if (provider.loading) return const Center(child: CircularProgressIndicator());
-          if (provider.unassignedTeachers.isEmpty && provider.unassignedStudents.isEmpty) {
+          if (provider.loading)
+            return const Center(child: CircularProgressIndicator());
+          if (provider.unassignedTeachers.isEmpty &&
+              provider.unassignedStudents.isEmpty) {
             return const Center(child: Text('No unassigned users'));
           }
           return Padding(
@@ -178,40 +177,42 @@ class UnassignedTeachersList extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
                       'Teachers',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
-                  ...provider.unassignedTeachers
-                      .map(
-                        (user) => _userCard(
-                          context,
-                          user,
-                          avatarSize,
-                          fontSize,
-                          cardMargin,
-                        ),
-                      )
-                      .toList(),
+                  ...provider.unassignedTeachers.map(
+                    (user) => _userCard(
+                      context,
+                      user,
+                      avatarSize,
+                      fontSize,
+                      cardMargin,
+                    ),
+                  ),
                 ],
                 if (provider.unassignedStudents.isNotEmpty) ...[
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
                       ' Students',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                   ),
-                  ...provider.unassignedStudents
-                      .map(
-                        (user) => _userCard(
-                          context,
-                          user,
-                          avatarSize,
-                          fontSize,
-                          cardMargin,
-                        ),
-                      )
-                      .toList(),
+                  ...provider.unassignedStudents.map(
+                    (user) => _userCard(
+                      context,
+                      user,
+                      avatarSize,
+                      fontSize,
+                      cardMargin,
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -234,27 +235,33 @@ class UnassignedTeachersList extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => TeachersDetails(
-              user: user,
-              isUnassigned: !isTeacher,
-              onAssign: isTeacher
-                  ? () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AssignStudents(teacherUid: user['uid']),
-                        ),
-                      );
-                    }
-                  : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AssignTeachers(studentUid: user['uid']),
-                        ),
-                      );
-                    },
-            ),
+            builder:
+                (context) => TeachersDetails(
+                  user: user,
+                  isUnassigned: !isTeacher,
+                  onAssign:
+                      isTeacher
+                          ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) =>
+                                        AssignStudents(teacherUid: user['uid']),
+                              ),
+                            );
+                          }
+                          : () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) =>
+                                        AssignTeachers(studentUid: user['uid']),
+                              ),
+                            );
+                          },
+                ),
           ),
         );
       },

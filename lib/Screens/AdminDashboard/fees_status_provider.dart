@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 
 class FeesStatusProvider extends ChangeNotifier {
   String selectedRole = 'All';
@@ -21,7 +20,8 @@ class FeesStatusProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final lastResetMonth = prefs.getInt('lastFeeResetMonth') ?? 0;
     final lastResetYear = prefs.getInt('lastFeeResetYear') ?? 0;
-    if (now.day > 1 && (now.month != lastResetMonth || now.year != lastResetYear)) {
+    if (now.day > 1 &&
+        (now.month != lastResetMonth || now.year != lastResetYear)) {
       final feeCollection = FirebaseFirestore.instance.collection('fee');
       final feeSnap = await feeCollection.get();
       final batch = FirebaseFirestore.instance.batch();
@@ -46,13 +46,17 @@ class FeesStatusProvider extends ChangeNotifier {
     notifyListeners();
     final firestore = FirebaseFirestore.instance;
     List<Map<String, dynamic>> fetchedUsers = [];
-    final now = DateTime.now();
     final month = selectedMonth.month;
     final year = selectedMonth.year;
     try {
       final studentSnap = await firestore.collection('students').get();
       final teacherSnap = await firestore.collection('teachers').get();
-      final feeSnap = await firestore.collection('fee').where('month', isEqualTo: month).where('year', isEqualTo: year).get();
+      final feeSnap =
+          await firestore
+              .collection('fee')
+              .where('month', isEqualTo: month)
+              .where('year', isEqualTo: year)
+              .get();
       final Map<String, Map<String, dynamic>> feeStatusMap = {
         for (var doc in feeSnap.docs) doc.data()['userId']: doc.data(),
       };
@@ -64,7 +68,8 @@ class FeesStatusProvider extends ChangeNotifier {
           'id': id,
           'name': data['fullName'] ?? 'Unnamed',
           'role': 'Student',
-          'feeStatus': feeData != null ? (feeData['feeStatus'] ?? 'Unpaid') : 'Unpaid',
+          'feeStatus':
+              feeData != null ? (feeData['feeStatus'] ?? 'Unpaid') : 'Unpaid',
           'lastUpdated': feeData != null ? feeData['lastUpdated'] : null,
           'enabled': true,
         });
@@ -77,7 +82,8 @@ class FeesStatusProvider extends ChangeNotifier {
           'id': id,
           'name': data['fullName'] ?? 'Unnamed',
           'role': 'Teacher',
-          'feeStatus': feeData != null ? (feeData['feeStatus'] ?? 'Unpaid') : 'Unpaid',
+          'feeStatus':
+              feeData != null ? (feeData['feeStatus'] ?? 'Unpaid') : 'Unpaid',
           'lastUpdated': feeData != null ? feeData['lastUpdated'] : null,
           'enabled': true,
         });
@@ -94,8 +100,13 @@ class FeesStatusProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get filteredUsers {
     return users.where((user) {
       final matchesRole = selectedRole == 'All' || user['role'] == selectedRole;
-      final matchesStatus = selectedStatus == 'All' || user['feeStatus'] == selectedStatus;
-      final matchesSearch = searchController.text.isEmpty || user['name']!.toLowerCase().contains(searchController.text.toLowerCase());
+      final matchesStatus =
+          selectedStatus == 'All' || user['feeStatus'] == selectedStatus;
+      final matchesSearch =
+          searchController.text.isEmpty ||
+          user['name']!.toLowerCase().contains(
+            searchController.text.toLowerCase(),
+          );
       return matchesRole && matchesStatus && matchesSearch;
     }).toList();
   }
@@ -155,6 +166,7 @@ class FeesStatusProvider extends ChangeNotifier {
     searchController.clear();
     notifyListeners();
   }
+
   void setMonth(DateTime val) => setSelectedMonth(val);
 
   Color getRoleColor(String role) {

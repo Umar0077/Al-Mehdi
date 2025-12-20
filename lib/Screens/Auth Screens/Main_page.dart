@@ -1,12 +1,10 @@
+import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar and bottom Tabs Screens/admin_mian_screen.dart';
 import 'package:al_mehdi_online_school/Screens/Auth%20Screens/login_screen.dart';
 import 'package:al_mehdi_online_school/students/student_home_screen/student_home_screen.dart';
 import 'package:al_mehdi_online_school/teachers/teacher_home_screen/teacher_home_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:al_mehdi_online_school/students/components/student_main_screen.dart';
-import 'package:al_mehdi_online_school/teachers/components/teacher_main_screen.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar and bottom Tabs Screens/admin_mian_screen.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});

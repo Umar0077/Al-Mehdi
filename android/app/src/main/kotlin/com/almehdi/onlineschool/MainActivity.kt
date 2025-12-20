@@ -1,4 +1,4 @@
-package com.example.al_mehdi_online_school
+package com.almehdi.onlineschool
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

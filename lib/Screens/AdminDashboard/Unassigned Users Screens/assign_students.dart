@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import '../../../services/notification_service.dart';
-import '../../../components/admin_sidebar.dart';
+
 import '../../../constants/colors.dart';
 import 'Teachers_details.dart';
-import '../admin_home_screen.dart';
 import 'assign_students_provider.dart';
 
 class AssignStudents extends StatelessWidget {
@@ -22,7 +19,8 @@ class AssignStudents extends StatelessWidget {
           final isWeb = screenWidth >= 900;
           double labelFontSize = isWeb ? 18 : 14;
 
-          if (provider.loading) return const Center(child: CircularProgressIndicator());
+          if (provider.loading)
+            return const Center(child: CircularProgressIndicator());
           if (provider.unassignedStudents.isEmpty) {
             return const Center(child: Text('No unassigned students'));
           }
@@ -37,12 +35,17 @@ class AssignStudents extends StatelessWidget {
                 final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TeachersDetails(
-                      user: {...student, 'role': 'Student'},
-                      isUnassigned: true,
-                      onAssign: teacherUid.isNotEmpty ? () => provider.assignStudent(context, student) : null,
-                      isFinalAssignment: teacherUid.isNotEmpty,
-                    ),
+                    builder:
+                        (context) => TeachersDetails(
+                          user: {...student, 'role': 'Student'},
+                          isUnassigned: true,
+                          onAssign:
+                              teacherUid.isNotEmpty
+                                  ? () =>
+                                      provider.assignStudent(context, student)
+                                  : null,
+                          isFinalAssignment: teacherUid.isNotEmpty,
+                        ),
                   ),
                 );
                 if (result == true) {
@@ -59,7 +62,10 @@ class AssignStudents extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 18,
+                    horizontal: 24,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -72,38 +78,38 @@ class AssignStudents extends StatelessWidget {
                       ),
                       assigned
                           ? Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.check,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Assigned',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: labelFontSize,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 18,
-                              color: appGreen,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
                             ),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.check,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Assigned',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: labelFontSize,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          : const Icon(
+                            Icons.arrow_forward_ios,
+                            size: 18,
+                            color: appGreen,
+                          ),
                     ],
                   ),
                 ),
@@ -130,7 +136,8 @@ class AssignStudents extends StatelessWidget {
                               fontSize: 24,
                             ),
                           ),
-                          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                          backgroundColor:
+                              Theme.of(context).scaffoldBackgroundColor,
                         ),
                         Expanded(
                           child: ListView.builder(
@@ -140,9 +147,16 @@ class AssignStudents extends StatelessWidget {
                             ),
                             itemCount: provider.unassignedStudents.length,
                             itemBuilder: (context, index) {
-                              final student = provider.unassignedStudents[index];
-                              final assigned = provider.assignedStatus[student['name']] ?? false;
-                              return studentCard(student, assigned, labelFontSize);
+                              final student =
+                                  provider.unassignedStudents[index];
+                              final assigned =
+                                  provider.assignedStatus[student['name']] ??
+                                  false;
+                              return studentCard(
+                                student,
+                                assigned,
+                                labelFontSize,
+                              );
                             },
                           ),
                         ),
@@ -164,12 +178,16 @@ class AssignStudents extends StatelessWidget {
                 leading: BackButton(),
               ),
               body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 24,
+                ),
                 child: ListView.builder(
                   itemCount: provider.unassignedStudents.length,
                   itemBuilder: (context, index) {
                     final student = provider.unassignedStudents[index];
-                    final assigned = provider.assignedStatus[student['name']] ?? false;
+                    final assigned =
+                        provider.assignedStatus[student['name']] ?? false;
                     return studentCard(student, assigned, labelFontSize);
                   },
                 ),

@@ -1,9 +1,3 @@
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_home_screen.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/attendance_screen.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/chat_screen.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/profile_screen.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/schedule_class.dart';
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/sidebar%20and%20bottom%20Tabs%20Screens/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
@@ -13,7 +7,11 @@ class AdminSidebar extends StatelessWidget {
   final int selectedIndex;
   final void Function(int)? onItemSelected;
 
-  const AdminSidebar({super.key, required this.selectedIndex, this.onItemSelected});
+  const AdminSidebar({
+    super.key,
+    required this.selectedIndex,
+    this.onItemSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
