@@ -1,0 +1,135 @@
+{
+  "project_info": {
+    "project_number": "295791005487",
+    "project_id": "sample-firebase-ai-app-456c6",
+    "storage_bucket": "sample-firebase-ai-app-456c6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295791005487:android:8e61e9811a25154e6a1bda",
+        "android_client_info": {
+          "package_name": "com.almehdi.onlineschool"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJGirvpXheVHexKt74_O6hjy3YS4ior-E"
+        },
+        {
+          "current_key": "AIzaSyC_w6TvSkLm0qDNQmfhhmBBSpme6Md8UCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.alMehdiOnlineSchool"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295791005487:android:7ca6fd9cee014be86a1bda",
+        "android_client_info": {
+          "package_name": "com.example.al_mehdi_online_school"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "295791005487-ivot3tn3dise12t36510c475j6125iaf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.al_mehdi_online_school",
+            "certificate_hash": "582cae5e00d47bb9cb57b07785ef61cc9cd09d0f"
+          }
+        },
+        {
+          "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJGirvpXheVHexKt74_O6hjy3YS4ior-E"
+        },
+        {
+          "current_key": "AIzaSyC_w6TvSkLm0qDNQmfhhmBBSpme6Md8UCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.alMehdiOnlineSchool"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295791005487:android:68ad2d9c13367dd96a1bda",
+        "android_client_info": {
+          "package_name": "com.online_school.al_mehdi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJGirvpXheVHexKt74_O6hjy3YS4ior-E"
+        },
+        {
+          "current_key": "AIzaSyC_w6TvSkLm0qDNQmfhhmBBSpme6Md8UCs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.alMehdiOnlineSchool"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
