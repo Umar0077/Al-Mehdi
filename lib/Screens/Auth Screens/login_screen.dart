@@ -1,19 +1,22 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+
 import 'package:al_mehdi_online_school/Screens/AdminDashboard/Unassigned%20Users%20Screens/wait_for_assignment_screen.dart';
 import 'package:al_mehdi_online_school/Screens/Auth%20Screens/Main_page.dart';
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/register_screen.dart';
+import 'package:al_mehdi_online_school/Screens/Auth%20Screens/admin_login_screen.dart';
 import 'package:al_mehdi_online_school/Screens/Auth%20Screens/forgot_password.dart';
+import 'package:al_mehdi_online_school/Screens/Auth%20Screens/register_screen.dart';
 import 'package:al_mehdi_online_school/Screens/support_screen.dart';
 import 'package:al_mehdi_online_school/components/Custom_Textfield.dart';
 import 'package:al_mehdi_online_school/components/Custom_button.dart';
 import 'package:al_mehdi_online_school/components/Social_Login_button.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/admin_login_screen.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -56,24 +59,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Check if the user is disabled
       final studentDoc =
-          await FirebaseFirestore.instance.collection('students').doc(user.uid).get();
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(user.uid)
+              .get();
       final teacherDoc =
-          await FirebaseFirestore.instance.collection('teachers').doc(user.uid).get();
+          await FirebaseFirestore.instance
+              .collection('teachers')
+              .doc(user.uid)
+              .get();
       final userDoc = studentDoc.exists ? studentDoc : teacherDoc;
       if (userDoc.exists && userDoc.data()?['enabled'] == false) {
         await FirebaseAuth.instance.signOut();
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Account Disabled'),
-            content: const Text('You are currently disabled. Please contact admin.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+          builder:
+              (_) => AlertDialog(
+                title: const Text('Account Disabled'),
+                content: const Text(
+                  'You are currently disabled. Please contact admin.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
         return;
       }
@@ -158,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (googleUser == null) return;
 
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -172,39 +184,50 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user == null) return;
 
       // Check if the user is disabled
-      final studentDoc = await FirebaseFirestore.instance.collection('students').doc(user.uid).get();
-      final teacherDoc = await FirebaseFirestore.instance.collection('teachers').doc(user.uid).get();
+      final studentDoc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(user.uid)
+              .get();
+      final teacherDoc =
+          await FirebaseFirestore.instance
+              .collection('teachers')
+              .doc(user.uid)
+              .get();
       final userDoc = studentDoc.exists ? studentDoc : teacherDoc;
       if (userDoc.exists && userDoc.data()?['enabled'] == false) {
         await FirebaseAuth.instance.signOut();
         await GoogleSignIn().signOut();
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Account Disabled'),
-            content: const Text('You are currently disabled. Please contact admin.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+          builder:
+              (_) => AlertDialog(
+                title: const Text('Account Disabled'),
+                content: const Text(
+                  'You are currently disabled. Please contact admin.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
         return;
       }
 
       // Check if the user is in the unassigned_students collection
       final unassignedStudentDoc =
-      await FirebaseFirestore.instance
-          .collection('unassigned_students')
-          .doc(user.uid)
-          .get();
+          await FirebaseFirestore.instance
+              .collection('unassigned_students')
+              .doc(user.uid)
+              .get();
       final unassignedTeacherDoc =
-      await FirebaseFirestore.instance
-          .collection('unassigned_teachers')
-          .doc(user.uid)
-          .get();
+          await FirebaseFirestore.instance
+              .collection('unassigned_teachers')
+              .doc(user.uid)
+              .get();
 
       if (unassignedStudentDoc.exists &&
           unassignedStudentDoc['assigned'] == false) {
@@ -224,15 +247,15 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         final docStudent =
-        await FirebaseFirestore.instance
-            .collection('students')
-            .doc(user.uid)
-            .get();
+            await FirebaseFirestore.instance
+                .collection('students')
+                .doc(user.uid)
+                .get();
         final docTeacher =
-        await FirebaseFirestore.instance
-            .collection('teachers')
-            .doc(user.uid)
-            .get();
+            await FirebaseFirestore.instance
+                .collection('teachers')
+                .doc(user.uid)
+                .get();
 
         if (!docStudent.exists && !docTeacher.exists) {
           await FirebaseAuth.instance.signOut();
@@ -259,9 +282,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Add this method inside _LoginScreenState
   Future<void> _signInWithApple() async {
-          if (mounted) {
-        setState(() => _isLoading = true); // Show loader
-      }
+    if (mounted) {
+      setState(() => _isLoading = true); // Show loader
+    }
     try {
       // Check if we're running on iOS simulator
       if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
@@ -269,16 +292,18 @@ class _LoginScreenState extends State<LoginScreen> {
         try {
           final deviceInfo = await DeviceInfoPlugin().iosInfo;
           if (deviceInfo.isPhysicalDevice == false) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Apple Sign In is not fully supported in iOS Simulator. Please test on a physical device."),
-                      duration: Duration(seconds: 4),
-                    ),
-                  );
-                  if (mounted) {
-                    setState(() => _isLoading = false);
-                  }
-                  return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  "Apple Sign In is not fully supported in iOS Simulator. Please test on a physical device.",
+                ),
+                duration: Duration(seconds: 4),
+              ),
+            );
+            if (mounted) {
+              setState(() => _isLoading = false);
+            }
+            return;
           }
         } catch (e) {
           // If we can't determine device type, continue with the flow
@@ -321,7 +346,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // Check if we have valid tokens
-      if (credential.identityToken == null || credential.identityToken!.isEmpty) {
+      if (credential.identityToken == null ||
+          credential.identityToken!.isEmpty) {
         throw Exception("Failed to get identity token from Apple");
       }
 
@@ -330,44 +356,67 @@ class _LoginScreenState extends State<LoginScreen> {
         accessToken: credential.authorizationCode,
       );
 
-      final userCredential = await FirebaseAuth.instance.signInWithCredential(oauthCredential);
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(
+        oauthCredential,
+      );
       final user = userCredential.user;
       if (user == null) return;
 
       // Check if the user is disabled
-      final studentDoc = await FirebaseFirestore.instance.collection('students').doc(user.uid).get();
-      final teacherDoc = await FirebaseFirestore.instance.collection('teachers').doc(user.uid).get();
+      final studentDoc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(user.uid)
+              .get();
+      final teacherDoc =
+          await FirebaseFirestore.instance
+              .collection('teachers')
+              .doc(user.uid)
+              .get();
       final userDoc = studentDoc.exists ? studentDoc : teacherDoc;
       if (userDoc.exists && userDoc.data()?['enabled'] == false) {
         await FirebaseAuth.instance.signOut();
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
-            title: const Text('Account Disabled'),
-            content: const Text('You are currently disabled. Please contact admin.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('OK'),
+          builder:
+              (_) => AlertDialog(
+                title: const Text('Account Disabled'),
+                content: const Text(
+                  'You are currently disabled. Please contact admin.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
         return;
       }
 
       // Check if the user is in the unassigned_students collection
-      final unassignedStudentDoc = await FirebaseFirestore.instance.collection('unassigned_students').doc(user.uid).get();
-      final unassignedTeacherDoc = await FirebaseFirestore.instance.collection('unassigned_teachers').doc(user.uid).get();
+      final unassignedStudentDoc =
+          await FirebaseFirestore.instance
+              .collection('unassigned_students')
+              .doc(user.uid)
+              .get();
+      final unassignedTeacherDoc =
+          await FirebaseFirestore.instance
+              .collection('unassigned_teachers')
+              .doc(user.uid)
+              .get();
 
-      if (unassignedStudentDoc.exists && unassignedStudentDoc['assigned'] == false) {
+      if (unassignedStudentDoc.exists &&
+          unassignedStudentDoc['assigned'] == false) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => WaitForAssignmentScreen(role: 'Student'),
           ),
         );
-      } else if (unassignedTeacherDoc.exists && unassignedTeacherDoc['assigned'] == false) {
+      } else if (unassignedTeacherDoc.exists &&
+          unassignedTeacherDoc['assigned'] == false) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -376,21 +425,25 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         // Check if the user is a student or teacher and navigate accordingly
-        final studentDoc = await FirebaseFirestore.instance.collection('students').doc(user.uid).get();
-        final teacherDoc = await FirebaseFirestore.instance.collection('teachers').doc(user.uid).get();
+        final studentDoc =
+            await FirebaseFirestore.instance
+                .collection('students')
+                .doc(user.uid)
+                .get();
+        final teacherDoc =
+            await FirebaseFirestore.instance
+                .collection('teachers')
+                .doc(user.uid)
+                .get();
         if (studentDoc.exists) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => const MainPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const MainPage()),
           );
         } else if (teacherDoc.exists) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => const MainPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const MainPage()),
           );
         } else {
           await FirebaseAuth.instance.signOut();
@@ -403,10 +456,11 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       String errorMessage = "Apple Sign In failed";
-      
+
       // Handle specific Apple Sign In errors
       if (e.toString().contains("1000")) {
-        errorMessage = "Apple Sign In configuration error. This is common in iOS Simulator. Please test on a physical device.";
+        errorMessage =
+            "Apple Sign In configuration error. This is common in iOS Simulator. Please test on a physical device.";
       } else if (e.toString().contains("1001")) {
         errorMessage = "Apple Sign In was cancelled by the user.";
       } else if (e.toString().contains("1002")) {
@@ -427,12 +481,14 @@ class _LoginScreenState extends State<LoginScreen> {
         errorMessage = "Apple Sign In failed due to invalid grant type.";
       } else if (e.toString().contains("1010")) {
         errorMessage = "Apple Sign In failed due to invalid code.";
-      } else if (e.toString().contains("AKAuthenticationError") || e.toString().contains("ASAuthorizationController")) {
-        errorMessage = "Apple Sign In is not supported in iOS Simulator. Please test on a physical device for full functionality.";
+      } else if (e.toString().contains("AKAuthenticationError") ||
+          e.toString().contains("ASAuthorizationController")) {
+        errorMessage =
+            "Apple Sign In is not supported in iOS Simulator. Please test on a physical device for full functionality.";
       } else {
         errorMessage = "Apple Sign In failed: ${e.toString()}";
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
@@ -601,13 +657,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _signInWithGoogle,
                   ),
                   const SizedBox(height: 10),
-                  SocialLoginButton(
-                    imagePath: 'assets/logo/apple.png',
-                    labelText: 'Continue with Apple',
-                    imagePadding: const EdgeInsets.only(left: 10),
-                    width: responsiveWidth,
-                    onPressed: _signInWithApple,
-                  ),
+                  Platform.isIOS
+                      ? SocialLoginButton(
+                        imagePath: 'assets/logo/apple.png',
+                        labelText: 'Continue with Apple',
+                        imagePadding: const EdgeInsets.only(left: 10),
+                        width: responsiveWidth,
+                        onPressed: _signInWithApple,
+                      )
+                      : SizedBox.shrink(),
                   const SizedBox(height: 10),
                   const SizedBox(height: 20),
                   TextButton(
@@ -643,9 +701,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
