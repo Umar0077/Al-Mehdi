@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "295791005487-dammtt92b1l42pdp75rvvc081f6iielc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.almehdi.onlineschool",
+            "certificate_hash": "c1b819b76fd22222d570e4b7a2c8b4fecd2622d0"
+          }
+        },
+        {
+          "client_id": "295791005487-i2qotgimsss08tqcqultkpaigcibvg96.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.almehdi.onlineschool",
+            "certificate_hash": "a242b345f6d369b781e1bc8f35db4d89484d54b9"
+          }
+        },
+        {
           "client_id": "295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -34,10 +50,10 @@
               "client_type": 3
             },
             {
-              "client_id": "295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com",
+              "client_id": "295791005487-epsbj47r76kp3id081iaj921thttjduc.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.alMehdiOnlineSchool"
+                "bundle_id": "com.almehdi.onlineschool"
               }
             }
           ]
@@ -81,10 +97,10 @@
               "client_type": 3
             },
             {
-              "client_id": "295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com",
+              "client_id": "295791005487-epsbj47r76kp3id081iaj921thttjduc.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.alMehdiOnlineSchool"
+                "bundle_id": "com.almehdi.onlineschool"
               }
             }
           ]
@@ -120,10 +136,10 @@
               "client_type": 3
             },
             {
-              "client_id": "295791005487-v67sq57foko3mg455c5n9dssrhs5005l.apps.googleusercontent.com",
+              "client_id": "295791005487-epsbj47r76kp3id081iaj921thttjduc.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.alMehdiOnlineSchool"
+                "bundle_id": "com.almehdi.onlineschool"
               }
             }
           ]

@@ -46,6 +46,10 @@ post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     
+    # Check if the current target is one of the problematic libraries
+    # (Jitsi, Hermes, Giphy) that cause "Upload Symbols Failed" errors
+    should_disable_dsym = ['JitsiMeetSDK', 'Heremes', 'hermes', 'Giphy', 'GiphyUISDK'].any? { |n| target.name.include?(n) }
+
     target.build_configurations.each do |config|
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.1'
       
@@ -55,6 +59,13 @@ post_install do |installer|
       
       # Exclude arm64 for simulator builds
       config.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64'
+
+      # --- FIX FOR TESTFLIGHT UPLOAD ERRORS ---
+      # If this is Jitsi/Hermes/Giphy, disable dSYM generation (DWARF only)
+      if should_disable_dsym
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = 'DWARF'
+      end
+      # ----------------------------------------
     end
   end
 end
