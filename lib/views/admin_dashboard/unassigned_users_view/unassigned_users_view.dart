@@ -2,8 +2,8 @@ import 'package:al_mehdi_online_school/views/admin_dashboard/admin_home_view.dar
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../providers/unassigned_user_screens/notifications_provider.dart';
-import '../../../providers/unassigned_user_screens/unassigned_users_provider.dart';
+import '../../../providers/unassigned_user/notifications_provider.dart';
+import '../../../providers/unassigned_user/unassigned_users_provider.dart';
 import '../notifications_view.dart';
 import 'assign_students_view.dart';
 import 'assign_teachers_view.dart';

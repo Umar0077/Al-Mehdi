@@ -8,7 +8,7 @@ import 'package:al_mehdi_online_school/views/admin_dashboard/sidebar_and%20botto
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/unassigned_user_screens/admin_main_provider.dart';
+import '../../providers/unassigned_user/admin_main_provider.dart';
 
 class AdminMainView extends StatelessWidget {
   const AdminMainView({super.key});

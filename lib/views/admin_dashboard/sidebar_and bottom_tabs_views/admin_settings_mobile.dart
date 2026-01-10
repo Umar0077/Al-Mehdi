@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
 import '../../../providers/admin/admin_settings_provider.dart';
 
-class AdminSettingsScreenMobile extends StatelessWidget {
-  const AdminSettingsScreenMobile({super.key});
+class AdminSettingsViewMobile extends StatelessWidget {
+  const AdminSettingsViewMobile({super.key});
 
   @override
   Widget build(BuildContext context) {

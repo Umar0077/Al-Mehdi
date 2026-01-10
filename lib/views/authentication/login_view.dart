@@ -1,7 +1,7 @@
 import 'package:al_mehdi_online_school/components/custom_button.dart';
 import 'package:al_mehdi_online_school/components/custom_textfield.dart';
 import 'package:al_mehdi_online_school/components/social_login_button.dart';
-import 'package:al_mehdi_online_school/providers/auth_provider.dart';
+import 'package:al_mehdi_online_school/providers/auth/auth_provider.dart';
 import 'package:al_mehdi_online_school/views/admin_dashboard/unassigned_users_view/wait_for_assignment_view.dart';
 import 'package:al_mehdi_online_school/views/authentication/admin_login_view.dart';
 import 'package:al_mehdi_online_school/views/authentication/auth_view.dart';

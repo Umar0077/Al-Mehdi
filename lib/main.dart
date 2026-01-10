@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart'; // ✅ Import generated config
-import 'providers/unassigned_user_screens/admin_home_provider.dart';
+import 'providers/unassigned_user/admin_home_provider.dart';
 import 'services/notification_service.dart';
 import 'services/onboarding_service.dart';
 import 'views/authentication/auth_view.dart';

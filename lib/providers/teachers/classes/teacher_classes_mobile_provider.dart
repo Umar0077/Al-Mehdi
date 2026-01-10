@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/class_completion_service.dart';
+import '../../../services/class_completion_service.dart';
 
-class StudentClassesWebProvider extends ChangeNotifier {
+class TeacherClassesMobileProvider extends ChangeNotifier {
   int tabIndex = 0;
   List<DocumentSnapshot> upcomingClasses = [];
   List<DocumentSnapshot> completedClasses = [];
@@ -15,7 +15,7 @@ class StudentClassesWebProvider extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _classesSubscription;
   Timer? _refreshTimer;
 
-  StudentClassesWebProvider() {
+  TeacherClassesMobileProvider() {
     _startListeningToClasses();
     _startPeriodicRefresh();
     // Initialize class completion service
@@ -26,6 +26,7 @@ class StudentClassesWebProvider extends ChangeNotifier {
   void dispose() {
     _classesSubscription?.cancel();
     _refreshTimer?.cancel();
+    ClassCompletionService().stopCompletionMonitoring();
     super.dispose();
   }
 
@@ -35,7 +36,7 @@ class StudentClassesWebProvider extends ChangeNotifier {
 
     _classesSubscription = FirebaseFirestore.instance
         .collection('classes')
-        .where('studentId', isEqualTo: userId)
+        .where('teacherId', isEqualTo: userId)
         .snapshots()
         .listen((snapshot) {
           _processClasses(snapshot.docs);
@@ -61,13 +62,17 @@ class StudentClassesWebProvider extends ChangeNotifier {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
 
-    final query =
-        await FirebaseFirestore.instance
-            .collection('classes')
-            .where('studentId', isEqualTo: userId)
-            .get();
+    try {
+      final query =
+          await FirebaseFirestore.instance
+              .collection('classes')
+              .where('teacherId', isEqualTo: userId)
+              .get();
 
-    _processClasses(query.docs);
+      _processClasses(query.docs);
+    } catch (e) {
+      print('Error loading classes: $e');
+    }
   }
 
   void _processClasses(List<QueryDocumentSnapshot> docs) {
@@ -79,6 +84,7 @@ class StudentClassesWebProvider extends ChangeNotifier {
     for (var doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
       DateTime? classDateTime;
+
       if (data['scheduledAt'] != null) {
         classDateTime = (data['scheduledAt'] as Timestamp).toDate().toLocal();
       } else {
@@ -87,7 +93,8 @@ class StudentClassesWebProvider extends ChangeNotifier {
         final time = data['time'] ?? '';
         classDateTime = _parseClassDateTime(date, time);
       }
-      final studentJoined = data['studentJoined'] ?? false;
+
+      final teacherJoined = data['teacherJoined'] ?? false;
 
       // Check if class is within the joinable window (5 minutes before to 10 minutes after)
       final canJoin =
@@ -95,20 +102,26 @@ class StudentClassesWebProvider extends ChangeNotifier {
           now.isAfter(classDateTime.subtract(const Duration(minutes: 5))) &&
           now.isBefore(classDateTime.add(const Duration(minutes: 10)));
 
-      // Class is completed only after 10 minutes AND student joined
+      // Class is completed only after 10 minutes AND teacher joined
       final isCompleted =
-          studentJoined &&
+          teacherJoined &&
           classDateTime != null &&
           now.isAfter(classDateTime.add(const Duration(minutes: 10)));
 
-      // Class is missed if student never joined and it's past the 10-minute window
+      // Class is missed if teacher never joined and it's past the 10-minute window
       final isMissed =
-          !studentJoined &&
+          !teacherJoined &&
           classDateTime != null &&
           now.isAfter(classDateTime.add(const Duration(minutes: 10)));
 
       if (canJoin) {
         // Show in upcoming if within joinable window
+        upcomingClasses.add(doc);
+      } else if (!isCompleted &&
+          !isMissed &&
+          classDateTime != null &&
+          now.isBefore(classDateTime.add(const Duration(minutes: 10)))) {
+        // Also show classes that are upcoming but not yet in join window
         upcomingClasses.add(doc);
       } else if (isCompleted) {
         completedClasses.add(doc);

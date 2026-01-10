@@ -3,10 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 
-import '../../services/class_completion_service.dart';
+import '../../../services/class_completion_service.dart';
 
-class TeacherHomeMobileProvider extends ChangeNotifier {
+class TeacherHomeWebProvider extends ChangeNotifier {
   String? fullName;
+  String? profilePictureUrl;
   int selectedIndex = 0;
 
   // Jitsi and class logic
@@ -14,7 +15,7 @@ class TeacherHomeMobileProvider extends ChangeNotifier {
   Map<String, dynamic>? joinableClass;
   bool hasJoined = false;
 
-  TeacherHomeMobileProvider() {
+  TeacherHomeWebProvider() {
     // Initialize all services in parallel for better performance
     _initializeServices();
   }
@@ -36,12 +37,7 @@ class TeacherHomeMobileProvider extends ChangeNotifier {
     // Start class completion monitoring
     ClassCompletionService().startCompletionMonitoring();
 
-    print('✅ Teacher mobile - All background services started');
-  }
-
-  void setSelectedIndex(int index) {
-    selectedIndex = index;
-    notifyListeners();
+    print('✅ Teacher web - All background services started');
   }
 
   Future<void> fetchTeacherName() async {
@@ -53,7 +49,13 @@ class TeacherHomeMobileProvider extends ChangeNotifier {
               .doc(user.uid)
               .get();
       if (doc.exists) {
-        fullName = doc['fullName'] ?? 'Teacher';
+        final data = doc.data() as Map<String, dynamic>;
+        fullName = data['fullName'] ?? 'Teacher';
+        // Fetch profile picture URL, checking both profilePictureUrl and avatarUrl fields
+        profilePictureUrl =
+            data['profilePictureUrl'] ??
+            data['avatarUrl'] ??
+            'https://i.pravatar.cc/150?u=${user.uid}';
         notifyListeners();
       }
     }
@@ -149,16 +151,8 @@ class TeacherHomeMobileProvider extends ChangeNotifier {
       final jitsiRoom = joinableClass!['jitsiRoom'] ?? '';
       if (jitsiRoom.isEmpty) throw 'No Jitsi room found.';
 
-      final options = JitsiMeetConferenceOptions(
-        room: jitsiRoom,
-        userInfo: JitsiMeetUserInfo(displayName: fullName ?? 'Teacher'),
-        featureFlags: {
-          "welcomepage.enabled": false,
-          "startWithAudioMuted": false,
-          "startWithVideoMuted": false,
-        },
-      );
-      await JitsiMeet().join(options);
+      // For web, use your web Jitsi integration here.
+      // await JitsiMeet().join(options); // For mobile, for web use your own logic
 
       // Only mark as joined after successful join
       await FirebaseFirestore.instance
@@ -172,5 +166,21 @@ class TeacherHomeMobileProvider extends ChangeNotifier {
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to join class: $e')));
     }
+  }
+
+  void setSelectedIndex(int index) {
+    selectedIndex = index;
+    notifyListeners();
+  }
+}
+
+class TeacherAttendanceHomeScreenProvider extends ChangeNotifier {
+  int _selectedIndex = 0;
+
+  int get selectedIndex => _selectedIndex;
+
+  void setSelectedIndex(int index) {
+    _selectedIndex = index;
+    notifyListeners();
   }
 }

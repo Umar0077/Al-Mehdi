@@ -13,10 +13,10 @@ class SettingsView extends StatelessWidget {
       builder: (context, constraints) {
         if (width >= 900) {
           // Desktop Layout
-          return const AdminSettingsScreenWeb();
+          return const AdminSettingsViewWeb();
         } else {
           // Mobile Layout
-          return const AdminSettingsScreenMobile();
+          return const AdminSettingsViewMobile();
         }
       },
     );

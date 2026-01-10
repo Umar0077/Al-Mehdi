@@ -3,11 +3,11 @@ import 'package:provider/provider.dart';
 
 import '../../../constants/colors.dart';
 import '../../../providers/admin/admin_settings_provider.dart';
-import '../../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../../providers/unassigned_user/notifications_provider.dart';
 import '../notifications_view.dart';
 
-class AdminSettingsScreenWeb extends StatelessWidget {
-  const AdminSettingsScreenWeb({super.key});
+class AdminSettingsViewWeb extends StatelessWidget {
+  const AdminSettingsViewWeb({super.key});
 
   @override
   Widget build(BuildContext context) {

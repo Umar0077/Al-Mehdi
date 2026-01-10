@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
 import '../../../components/teachers/teacher_image_picker.dart';
-import '../../../providers/teachers/teacher_profile_web_provider.dart';
+import '../../../providers/teachers/profile/teacher_profile_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../../admin_dashboard/unassigned_users_view/degree_preview_view.dart';
 import '../../students/student_notifications/student_notifications.dart';

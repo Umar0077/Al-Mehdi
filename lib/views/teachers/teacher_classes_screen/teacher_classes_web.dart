@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_classes_web_provider.dart';
+import '../../../providers/teachers/classes/teacher_classes_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../teacher_notifications/teacher_notifications.dart';
 import '../teacher_schedule_class/teacher_schedule_class.dart';

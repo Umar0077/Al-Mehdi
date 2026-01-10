@@ -16,8 +16,8 @@ import 'package:provider/provider.dart';
 
 import '../../providers/admin/admin_main_screen_provider.dart';
 import '../../providers/admin/admin_settings_provider.dart';
-import '../../providers/unassigned_user_screens/admin_home_provider.dart';
-import '../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../providers/unassigned_user/admin_home_provider.dart';
+import '../../providers/unassigned_user/notifications_provider.dart';
 import 'sidebar_and bottom_tabs_views/attendance_view.dart';
 import 'sidebar_and bottom_tabs_views/chat_view.dart';
 import 'sidebar_and bottom_tabs_views/profile_view.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_notification_web_provider.dart';
+import '../../../providers/students/notification/student_notification_web_provider.dart';
 import '../../../services/notification_service.dart';
 
 class StudentNotificationWebView extends StatelessWidget {

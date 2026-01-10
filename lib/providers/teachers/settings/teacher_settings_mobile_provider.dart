@@ -1,29 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../constants/colors.dart';
-import '../../main.dart';
-import '../../services/theme_service.dart';
-import '../../views/authentication/login_view.dart';
+import '../../../main.dart';
+import '../../../services/theme_service.dart';
+import '../../../views/authentication/login_view.dart';
 
-class StudentSettingsWebProvider extends ChangeNotifier {
+class TeacherSettingsMobileProvider extends ChangeNotifier {
   bool notificationsEnabled = true;
   bool _isLoading = false;
-  String _selectedLanguage = 'English';
 
   bool get isDarkMode => themeNotifier.value == ThemeMode.dark;
   bool get isLoading => _isLoading;
-  String get selectedLanguage => _selectedLanguage;
 
-  void setNotificationsEnabled(bool val) {
-    notificationsEnabled = val;
+  void setNotificationsEnabled(bool value) {
+    notificationsEnabled = value;
     notifyListeners();
   }
 
-  void setDarkMode(bool val) async {
-    final newTheme = val ? ThemeMode.dark : ThemeMode.light;
+  void setDarkMode(bool value) async {
+    final newTheme = value ? ThemeMode.dark : ThemeMode.light;
     themeNotifier.value = newTheme;
 
     // Save theme preference
@@ -37,39 +33,9 @@ class StudentSettingsWebProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  StudentSettingsWebProvider() {
-    _loadSelectedLanguage();
-  }
-
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();
-  }
-
-  Future<void> _loadSelectedLanguage() async {
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String? savedLanguage = prefs.getString(
-        'student_selected_language',
-      );
-      if (savedLanguage != null && savedLanguage.isNotEmpty) {
-        _selectedLanguage = savedLanguage;
-        notifyListeners();
-      }
-    } catch (e) {
-      // Non-fatal; default remains 'English'
-    }
-  }
-
-  Future<void> setLanguage(String language) async {
-    _selectedLanguage = language;
-    notifyListeners();
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('student_selected_language', language);
-    } catch (e) {
-      // Ignore persistence errors silently for now
-    }
   }
 
   // Show logout confirmation dialog
@@ -90,12 +56,14 @@ class StudentSettingsWebProvider extends ChangeNotifier {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                style: TextButton.styleFrom(foregroundColor: appGreen),
-                child: const Text('Cancel'),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.red),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: appGreen,
+                  backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () async {
@@ -207,15 +175,15 @@ class StudentSettingsWebProvider extends ChangeNotifier {
 
         // Delete user's main document from Firestore
         final userRef = FirebaseFirestore.instance
-            .collection('students')
+            .collection('teachers')
             .doc(userId);
 
         // Delete all subcollections
         final subcollections = [
           'messages',
+          'classes',
           'assignments',
-          'grades',
-          'attendance',
+          'students',
         ];
 
         for (String subcollection in subcollections) {

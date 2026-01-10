@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constants/colors.dart';
 import '../../../components/students/student_sidebar.dart';
-import '../../../providers/teachers/teacher_home_screen_web_provider.dart';
+import '../../../providers/teachers/home/teacher_home_view_web_provider.dart';
 // import '../teacher_chat/teacher_chat_web.dart';
 import '../../../services/notification_service.dart';
 import '../teacher_attendance/teacher_attendance.dart';

@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/class_completion_service.dart';
+import '../../../services/class_completion_service.dart';
 
-class TeacherClassesMobileProvider extends ChangeNotifier {
+class TeacherClassesWebProvider extends ChangeNotifier {
   int tabIndex = 0;
   List<DocumentSnapshot> upcomingClasses = [];
   List<DocumentSnapshot> completedClasses = [];
@@ -15,7 +15,10 @@ class TeacherClassesMobileProvider extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _classesSubscription;
   Timer? _refreshTimer;
 
-  TeacherClassesMobileProvider() {
+  // New field to control schedule class screen visibility
+  bool showScheduleClass = false;
+
+  TeacherClassesWebProvider() {
     _startListeningToClasses();
     _startPeriodicRefresh();
     // Initialize class completion service
@@ -55,6 +58,13 @@ class TeacherClassesMobileProvider extends ChangeNotifier {
 
   void setTabIndex(int index) {
     tabIndex = index;
+    showScheduleClass = false; // Hide schedule screen when tab is changed
+    notifyListeners();
+  }
+
+  // New method to show/hide the schedule class screen
+  void setShowScheduleClass(bool value) {
+    showScheduleClass = value;
     notifyListeners();
   }
 
@@ -83,49 +93,12 @@ class TeacherClassesMobileProvider extends ChangeNotifier {
 
     for (var doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
-      DateTime? classDateTime;
-
-      if (data['scheduledAt'] != null) {
-        classDateTime = (data['scheduledAt'] as Timestamp).toDate().toLocal();
-      } else {
-        // fallback for old data
-        final date = data['date'] ?? '';
-        final time = data['time'] ?? '';
-        classDateTime = _parseClassDateTime(date, time);
-      }
-
-      final teacherJoined = data['teacherJoined'] ?? false;
-
-      // Check if class is within the joinable window (5 minutes before to 10 minutes after)
-      final canJoin =
-          classDateTime != null &&
-          now.isAfter(classDateTime.subtract(const Duration(minutes: 5))) &&
-          now.isBefore(classDateTime.add(const Duration(minutes: 10)));
-
-      // Class is completed only after 10 minutes AND teacher joined
-      final isCompleted =
-          teacherJoined &&
-          classDateTime != null &&
-          now.isAfter(classDateTime.add(const Duration(minutes: 10)));
-
-      // Class is missed if teacher never joined and it's past the 10-minute window
-      final isMissed =
-          !teacherJoined &&
-          classDateTime != null &&
-          now.isAfter(classDateTime.add(const Duration(minutes: 10)));
-
-      if (canJoin) {
-        // Show in upcoming if within joinable window
+      final status = (data['status'] ?? 'upcoming').toString().toLowerCase();
+      if (status == 'upcoming') {
         upcomingClasses.add(doc);
-      } else if (!isCompleted &&
-          !isMissed &&
-          classDateTime != null &&
-          now.isBefore(classDateTime.add(const Duration(minutes: 10)))) {
-        // Also show classes that are upcoming but not yet in join window
-        upcomingClasses.add(doc);
-      } else if (isCompleted) {
+      } else if (status == 'completed') {
         completedClasses.add(doc);
-      } else if (isMissed) {
+      } else if (status == 'missed') {
         missedClasses.add(doc);
       }
     }

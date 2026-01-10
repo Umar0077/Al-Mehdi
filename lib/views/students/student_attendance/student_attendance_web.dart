@@ -4,7 +4,7 @@ import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_attendance_web_provider.dart';
+import '../../../providers/students/attendance/student_attendance_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../student_notifications/student_notifications.dart';
 

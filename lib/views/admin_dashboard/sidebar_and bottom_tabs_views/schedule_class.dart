@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../constants/colors.dart';
 import '../../../providers/admin/schedule_class_provider.dart';
-import '../../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../../providers/unassigned_user/notifications_provider.dart';
 
 class ScheduleClass extends StatelessWidget {
   const ScheduleClass({super.key});

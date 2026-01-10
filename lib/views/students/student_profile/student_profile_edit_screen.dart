@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../components/custom_button.dart';
 // Removed unused imports
 import '../../../components/custom_textfield.dart';
-import '../../../providers/students/student_profile_edit_provider.dart';
+import '../../../providers/students/profile/student_profile_edit_provider.dart';
 
 class StudentProfileEditScreen extends StatelessWidget {
   final String currentFullName;

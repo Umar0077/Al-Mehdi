@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/class_completion_service.dart';
+import '../../../services/class_completion_service.dart';
 
-class TeacherClassesWebProvider extends ChangeNotifier {
+class StudentClassesWebProvider extends ChangeNotifier {
   int tabIndex = 0;
   List<DocumentSnapshot> upcomingClasses = [];
   List<DocumentSnapshot> completedClasses = [];
@@ -15,10 +15,7 @@ class TeacherClassesWebProvider extends ChangeNotifier {
   StreamSubscription<QuerySnapshot>? _classesSubscription;
   Timer? _refreshTimer;
 
-  // New field to control schedule class screen visibility
-  bool showScheduleClass = false;
-
-  TeacherClassesWebProvider() {
+  StudentClassesWebProvider() {
     _startListeningToClasses();
     _startPeriodicRefresh();
     // Initialize class completion service
@@ -29,7 +26,6 @@ class TeacherClassesWebProvider extends ChangeNotifier {
   void dispose() {
     _classesSubscription?.cancel();
     _refreshTimer?.cancel();
-    ClassCompletionService().stopCompletionMonitoring();
     super.dispose();
   }
 
@@ -39,7 +35,7 @@ class TeacherClassesWebProvider extends ChangeNotifier {
 
     _classesSubscription = FirebaseFirestore.instance
         .collection('classes')
-        .where('teacherId', isEqualTo: userId)
+        .where('studentId', isEqualTo: userId)
         .snapshots()
         .listen((snapshot) {
           _processClasses(snapshot.docs);
@@ -58,13 +54,6 @@ class TeacherClassesWebProvider extends ChangeNotifier {
 
   void setTabIndex(int index) {
     tabIndex = index;
-    showScheduleClass = false; // Hide schedule screen when tab is changed
-    notifyListeners();
-  }
-
-  // New method to show/hide the schedule class screen
-  void setShowScheduleClass(bool value) {
-    showScheduleClass = value;
     notifyListeners();
   }
 
@@ -72,17 +61,13 @@ class TeacherClassesWebProvider extends ChangeNotifier {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId == null) return;
 
-    try {
-      final query =
-          await FirebaseFirestore.instance
-              .collection('classes')
-              .where('teacherId', isEqualTo: userId)
-              .get();
+    final query =
+        await FirebaseFirestore.instance
+            .collection('classes')
+            .where('studentId', isEqualTo: userId)
+            .get();
 
-      _processClasses(query.docs);
-    } catch (e) {
-      print('Error loading classes: $e');
-    }
+    _processClasses(query.docs);
   }
 
   void _processClasses(List<QueryDocumentSnapshot> docs) {
@@ -93,12 +78,41 @@ class TeacherClassesWebProvider extends ChangeNotifier {
 
     for (var doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
-      final status = (data['status'] ?? 'upcoming').toString().toLowerCase();
-      if (status == 'upcoming') {
+      DateTime? classDateTime;
+      if (data['scheduledAt'] != null) {
+        classDateTime = (data['scheduledAt'] as Timestamp).toDate().toLocal();
+      } else {
+        // fallback for old data
+        final date = data['date'] ?? '';
+        final time = data['time'] ?? '';
+        classDateTime = _parseClassDateTime(date, time);
+      }
+      final studentJoined = data['studentJoined'] ?? false;
+
+      // Check if class is within the joinable window (5 minutes before to 10 minutes after)
+      final canJoin =
+          classDateTime != null &&
+          now.isAfter(classDateTime.subtract(const Duration(minutes: 5))) &&
+          now.isBefore(classDateTime.add(const Duration(minutes: 10)));
+
+      // Class is completed only after 10 minutes AND student joined
+      final isCompleted =
+          studentJoined &&
+          classDateTime != null &&
+          now.isAfter(classDateTime.add(const Duration(minutes: 10)));
+
+      // Class is missed if student never joined and it's past the 10-minute window
+      final isMissed =
+          !studentJoined &&
+          classDateTime != null &&
+          now.isAfter(classDateTime.add(const Duration(minutes: 10)));
+
+      if (canJoin) {
+        // Show in upcoming if within joinable window
         upcomingClasses.add(doc);
-      } else if (status == 'completed') {
+      } else if (isCompleted) {
         completedClasses.add(doc);
-      } else if (status == 'missed') {
+      } else if (isMissed) {
         missedClasses.add(doc);
       }
     }

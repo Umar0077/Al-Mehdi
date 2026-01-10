@@ -3,8 +3,8 @@ import 'package:al_mehdi_online_school/views/admin_dashboard/notifications_view.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/unassigned_user_screens/active_class_provider.dart';
-import '../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../providers/unassigned_user/active_class_provider.dart';
+import '../../providers/unassigned_user/notifications_provider.dart';
 
 class ActiveClassView extends StatelessWidget {
   const ActiveClassView({super.key});

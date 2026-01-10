@@ -7,7 +7,7 @@ import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_home_screen_mobile_provider.dart';
+import '../../../providers/students/home/student_home_view_mobile_provider.dart';
 import '../../../services/notification_service.dart';
 import '../student_attendance/student_attendance.dart';
 import '../student_notifications/student_notifications.dart';
@@ -45,9 +45,9 @@ class StudentHomeScreenMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<StudentHomeScreenMobileProvider>(
-      create: (_) => StudentHomeScreenMobileProvider(),
-      child: Consumer<StudentHomeScreenMobileProvider>(
+    return ChangeNotifierProvider<StudentHomeViewMobileProvider>(
+      create: (_) => StudentHomeViewMobileProvider(),
+      child: Consumer<StudentHomeViewMobileProvider>(
         builder: (context, provider, _) {
           final fullName = provider.fullName;
           return Scaffold(

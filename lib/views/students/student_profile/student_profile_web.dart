@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
 import '../../../components/teachers/teacher_image_picker.dart'; // reuse teacher image picker
-import '../../../providers/students/student_profile_web_provider.dart';
+import '../../../providers/students/profile/student_profile_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../student_notifications/student_notifications.dart';
 

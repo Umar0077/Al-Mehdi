@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_settings_web_provider.dart';
+import '../../../providers/students/settings/student_settings_web_provider.dart';
 
 class StudentSettingsWebView extends StatelessWidget {
   const StudentSettingsWebView({super.key});

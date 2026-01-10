@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_attendance_web_provider.dart';
+import '../../../providers/teachers/attendance/teacher_attendance_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../teacher_notifications/teacher_notifications.dart';
 

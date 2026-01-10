@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_schedule_class_mobile_provider.dart';
+import '../../../providers/teachers/classes/teacher_schedule_class_mobile_provider.dart';
 
 class TeacherScheduleClassMobile extends StatelessWidget {
   const TeacherScheduleClassMobile({super.key});

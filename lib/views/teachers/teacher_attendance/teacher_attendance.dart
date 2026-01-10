@@ -3,7 +3,7 @@ import 'package:al_mehdi_online_school/views/teachers/teacher_attendance/teacher
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../providers/teachers/teacher_attendance_screen_provider.dart';
+import '../../../providers/teachers/attendance/teacher_attendance_screen_provider.dart';
 
 class TeacherAttendanceScreen extends StatelessWidget {
   const TeacherAttendanceScreen({super.key});

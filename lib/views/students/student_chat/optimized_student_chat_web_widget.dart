@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_chat_web_provider.dart';
+import '../../../providers/students/chat/student_chat_web_provider.dart';
 import '../../../services/chat_service.dart';
 
 class OptimizedStudentChatWebWidget extends StatefulWidget {

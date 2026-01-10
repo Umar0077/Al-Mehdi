@@ -1,6 +1,6 @@
 import 'package:al_mehdi_online_school/components/custom_button.dart';
 import 'package:al_mehdi_online_school/components/custom_textfield.dart';
-import 'package:al_mehdi_online_school/providers/auth_provider.dart';
+import 'package:al_mehdi_online_school/providers/auth/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

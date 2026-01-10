@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../components/teachers/chats.dart';
 import '../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_chat_mobile_provider.dart';
+import '../../../providers/teachers/chat/teacher_chat_mobile_provider.dart';
 import '../../../services/chat_service.dart';
 
 class TeacherChatScreenMobile extends StatelessWidget {

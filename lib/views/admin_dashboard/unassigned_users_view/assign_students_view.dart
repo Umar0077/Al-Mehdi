@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/colors.dart';
-import '../../../providers/unassigned_user_screens/assign_students_provider.dart';
+import '../../../providers/unassigned_user/assign_students_provider.dart';
 import 'user_details_view.dart';
 
 class AssignStudentsView extends StatelessWidget {

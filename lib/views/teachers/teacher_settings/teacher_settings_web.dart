@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_settings_web_provider.dart';
+import '../../../providers/teachers/settings/teacher_settings_web_provider.dart';
 import '../../students/student_notifications/student_notifications.dart';
 
 class TeacherSettingsScreenWeb extends StatelessWidget {

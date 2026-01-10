@@ -2,21 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../services/chat_service.dart';
-import '../../services/notification_service.dart';
+import '../../../services/chat_service.dart';
+import '../../../services/notification_service.dart';
 
-class StudentChatWebProvider extends ChangeNotifier {
-  int? selectedChatIndex;
+class StudentChatMobileProvider extends ChangeNotifier {
   String? assignedTeacherId;
   String? teacherName;
   String? teacherAvatar;
   bool isLoading = true;
-  String searchQuery = '';
+  String? error;
   List<String>? fcm_token;
-
-  // Cache student info to avoid repeated Firestore queries
-  String? _cachedStudentName;
-  String? _cachedStudentId;
 
   // Local message state management for optimistic updates
   final List<Map<String, dynamic>> _localMessages = [];
@@ -24,12 +19,7 @@ class StudentChatWebProvider extends ChangeNotifier {
       {}; // tempId -> status (sending/sent/failed)
   bool _isSending = false;
 
-  StudentChatWebProvider({String? initialTeacherId}) {
-    if (initialTeacherId != null) {
-      assignedTeacherId = initialTeacherId;
-      selectedChatIndex = 0;
-    }
-    _initializeStudentInfo();
+  StudentChatMobileProvider() {
     _loadAssignedTeacher();
   }
 
@@ -57,7 +47,7 @@ class StudentChatWebProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Fast message sending with optimistic updates for web
+  // Fast message sending with optimistic updates
   Future<void> sendMessageFast(String message) async {
     if (assignedTeacherId == null) return;
 
@@ -74,9 +64,93 @@ class StudentChatWebProvider extends ChangeNotifier {
       return;
     }
 
-    // Get student info from cache (no await needed!)
-    final studentInfo = getCurrentStudentInfo();
+    // Add message locally for immediate UI update
+    final localMessage = {
+      'tempId': tempId,
+      'message': message,
+      'senderId': currentUser.uid,
+      'timestamp': Timestamp.now(),
+      'senderName': 'You',
+      'senderRole': 'student',
+    };
+
+    addLocalMessage(localMessage);
+    updateMessageStatus(tempId, 'sending');
+
+    try {
+      // Send message using optimistic method
+      await ChatService.sendMessageOptimistic(
+        receiverId: assignedTeacherId!,
+        message: message,
+        senderName: 'Student', // Will be updated with actual name
+        senderRole: 'student',
+      );
+
+      // Update status to sent
+      updateMessageStatus(tempId, 'sent');
+
+      // Send FCM notification asynchronously
+      _sendFCMNotificationAsync(message);
+
+      // Remove from local messages after short delay (message will appear in stream)
+      Future.delayed(const Duration(milliseconds: 500), () {
+        removeLocalMessage(tempId);
+      });
+    } catch (e) {
+      updateMessageStatus(tempId, 'failed');
+      if (kDebugMode) {
+        print('❌ Error sending message: $e');
+      }
+    } finally {
+      _isSending = false;
+      notifyListeners();
+    }
+  }
+
+  // Get current student info for messaging
+  Future<Map<String, String?>> getCurrentStudentInfo() async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) return {'name': null, 'id': null};
+
+      final studentDoc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(currentUser.uid)
+              .get();
+
+      final studentData = studentDoc.data();
+      return {
+        'name': studentData?['fullName'] ?? 'Student',
+        'id': currentUser.uid,
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error getting student info: $e');
+      }
+      return {'name': 'Student', 'id': FirebaseAuth.instance.currentUser?.uid};
+    }
+  }
+
+  // Enhanced fast message sending with proper student name
+  Future<void> sendMessageWithStudentInfo(String message) async {
+    if (assignedTeacherId == null) return;
+
+    final studentInfo = await getCurrentStudentInfo();
     final studentName = studentInfo['name'] ?? 'Student';
+
+    _isSending = true;
+    notifyListeners();
+
+    // Generate temporary ID for optimistic update
+    final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      _isSending = false;
+      notifyListeners();
+      return;
+    }
 
     // Add message locally for immediate UI update
     final localMessage = {
@@ -92,7 +166,7 @@ class StudentChatWebProvider extends ChangeNotifier {
     updateMessageStatus(tempId, 'sending');
 
     try {
-      // Send message using optimistic method
+      // Send message using optimistic method with proper student name
       await ChatService.sendMessageOptimistic(
         receiverId: assignedTeacherId!,
         message: message,
@@ -121,43 +195,7 @@ class StudentChatWebProvider extends ChangeNotifier {
     }
   }
 
-  // Initialize student info once to avoid repeated queries
-  Future<void> _initializeStudentInfo() async {
-    try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser == null) return;
-
-      _cachedStudentId = currentUser.uid;
-
-      final studentDoc =
-          await FirebaseFirestore.instance
-              .collection('students')
-              .doc(currentUser.uid)
-              .get();
-
-      final studentData = studentDoc.data();
-      _cachedStudentName = studentData?['fullName'] ?? 'Student';
-
-      if (kDebugMode) {
-        print('✅ Student info cached: $_cachedStudentName');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error caching student info: $e');
-      }
-      _cachedStudentName = 'Student';
-    }
-  }
-
-  // Get current student info for messaging (now uses cache)
-  Map<String, String?> getCurrentStudentInfo() {
-    return {
-      'name': _cachedStudentName ?? 'Student',
-      'id': _cachedStudentId ?? FirebaseAuth.instance.currentUser?.uid,
-    };
-  }
-
-  // Send FCM notification asynchronously without blocking UI
+  // Updated FCM notification method with student name
   void _sendFCMNotificationAsync(String message, [String? studentName]) async {
     try {
       if (fcm_token != null && fcm_token!.isNotEmpty) {
@@ -219,46 +257,41 @@ class StudentChatWebProvider extends ChangeNotifier {
   }
 
   Future<void> _loadAssignedTeacher() async {
-    final studentDoc =
-        await FirebaseFirestore.instance
-            .collection('students')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .get();
-    final studentData = studentDoc.data();
-    if (studentData == null || studentData['assignedTeacherId'] == null) {
-      assignedTeacherId = null;
+    try {
+      final studentDoc =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .get();
+      final studentData = studentDoc.data();
+      if (studentData == null || studentData['assignedTeacherId'] == null) {
+        assignedTeacherId = null;
+        isLoading = false;
+        notifyListeners();
+        return;
+      }
+      assignedTeacherId = studentData['assignedTeacherId'];
+      final teacherDoc =
+          await FirebaseFirestore.instance
+              .collection('teachers')
+              .doc(assignedTeacherId)
+              .get();
+      final teacherData = teacherDoc.data();
+      teacherName = teacherData?['fullName'] ?? 'Teacher';
+      fcm_token =
+          teacherData?['fcmTokens'] != null
+              ? List<String>.from(teacherData!['fcmTokens'])
+              : [];
+      teacherAvatar =
+          teacherData?['profilePictureUrl'] ??
+          'https://i.pravatar.cc/100?u=$assignedTeacherId';
       isLoading = false;
       notifyListeners();
-      return;
+    } catch (e) {
+      error = e.toString();
+      isLoading = false;
+      notifyListeners();
     }
-    final teacherId = studentData['assignedTeacherId'];
-    final teacherDoc =
-        await FirebaseFirestore.instance
-            .collection('teachers')
-            .doc(teacherId)
-            .get();
-    final teacherData = teacherDoc.data();
-    assignedTeacherId = teacherId;
-    teacherName = teacherData?['fullName'] ?? 'Teacher';
-    teacherAvatar =
-        teacherData?['profilePictureUrl'] ??
-        'https://i.pravatar.cc/100?u=$teacherId';
-    fcm_token =
-        teacherData?['fcmTokens'] != null
-            ? List<String>.from(teacherData!['fcmTokens'])
-            : [];
-    isLoading = false;
-    notifyListeners();
-  }
-
-  void setSearchQuery(String val) {
-    searchQuery = val.trim();
-    notifyListeners();
-  }
-
-  void selectChatIndex(int idx) {
-    selectedChatIndex = idx;
-    notifyListeners();
   }
 
   String formatTime(Timestamp? timestamp) {

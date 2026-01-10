@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/admin/attendance_content_provider.dart';
-import '../../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../../providers/unassigned_user/notifications_provider.dart';
 
 class AttendanceView extends StatelessWidget {
   const AttendanceView({super.key});

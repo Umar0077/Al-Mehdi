@@ -4,7 +4,7 @@ import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_classes_mobile_provider.dart';
+import '../../../providers/teachers/classes/teacher_classes_mobile_provider.dart';
 import '../../../services/notification_service.dart';
 import '../teacher_schedule_class/teacher_schedule_class.dart';
 

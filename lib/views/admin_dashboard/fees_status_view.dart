@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/colors.dart';
-import '../../providers/unassigned_user_screens/fees_status_provider.dart';
-import '../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../providers/unassigned_user/fees_status_provider.dart';
+import '../../providers/unassigned_user/notifications_provider.dart';
 
 class FeesStatusView extends StatelessWidget {
   const FeesStatusView({super.key});

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_settings_mobile_provider.dart';
+import '../../../providers/teachers/settings/teacher_settings_mobile_provider.dart';
 import 'teacher_preference_card.dart';
 
 class TeacherSettingsScreenMobile extends StatelessWidget {

@@ -3,7 +3,7 @@ import 'package:al_mehdi_online_school/components/custom_textfield.dart';
 import 'package:al_mehdi_online_school/constants/colors.dart';
 import 'package:al_mehdi_online_school/constants/countries.dart';
 import 'package:al_mehdi_online_school/models/teacher_data.dart';
-import 'package:al_mehdi_online_school/providers/auth_provider.dart';
+import 'package:al_mehdi_online_school/providers/auth/auth_provider.dart';
 import 'package:al_mehdi_online_school/views/admin_dashboard/unassigned_users_view/wait_for_assignment_view.dart';
 import 'package:al_mehdi_online_school/views/teachers/teacher_home_screen/teacher_home_screen.dart';
 import 'package:file_picker/file_picker.dart';

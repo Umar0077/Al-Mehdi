@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../services/notification_service.dart';
+import '../../../../services/notification_service.dart';
 
 class TeacherScheduleClassMobileProvider extends ChangeNotifier {
   String? selectedStudentId;

@@ -11,7 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:web/web.dart' as web;
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_home_screen_web_provider.dart';
+import '../../../providers/students/home/student_home_view_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../../authentication/login_view.dart';
 import '../student_attendance/student_attendance.dart';

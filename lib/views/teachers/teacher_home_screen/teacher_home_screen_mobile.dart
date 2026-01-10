@@ -8,7 +8,7 @@ import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_home_screen_mobile_provider.dart';
+import '../../../providers/teachers/home/teacher_home_view_mobile_provider.dart';
 import '../../../services/notification_service.dart';
 import '../teacher_attendance/teacher_attendance.dart';
 import '../teacher_chat/teacher_chat.dart';

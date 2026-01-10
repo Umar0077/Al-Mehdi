@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../providers/admin/profile_screen_provider.dart';
-import '../../../providers/unassigned_user_screens/notifications_provider.dart';
+import '../../../providers/unassigned_user/notifications_provider.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});

@@ -3,17 +3,25 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:jitsi_meet_flutter_sdk/jitsi_meet_flutter_sdk.dart';
 
-import '../../services/class_completion_service.dart';
+import '../../../services/class_completion_service.dart';
 
-class StudentHomeScreenMobileProvider extends ChangeNotifier {
+class StudentHomeScreenWebProvider extends ChangeNotifier {
   String? fullName;
+  String? profilePictureUrl;
   String? assignedTeacherId;
-  bool jitsiInitialized = false;
+  int selectedIndex = 0;
+  bool showChat = false;
+  Map<String, dynamic>? chatData;
+
+  // Class joining logic
   Map<String, dynamic>? joinableClass;
   bool hasJoined = false;
 
-  StudentHomeScreenMobileProvider() {
-    // Initialize all services and start background services
+  // Jitsi initialization state
+  bool jitsiInitialized = false;
+
+  StudentHomeScreenWebProvider() {
+    // Initialize all services in parallel for better performance
     _initializeServices();
   }
 
@@ -38,13 +46,7 @@ class StudentHomeScreenMobileProvider extends ChangeNotifier {
     // Start class completion monitoring
     ClassCompletionService().startCompletionMonitoring();
 
-    print('✅ Student mobile - All background services started');
-  }
-
-  Future<void> initialize() async {
-    await fetchStudentNameAndTeacher();
-    await _initJitsi();
-    await checkForJoinableClass();
+    print('✅ Student web - All background services started');
   }
 
   Future<void> fetchStudentNameAndTeacher() async {
@@ -56,8 +58,14 @@ class StudentHomeScreenMobileProvider extends ChangeNotifier {
               .doc(user.uid)
               .get();
       if (doc.exists) {
-        fullName = doc['fullName'] ?? 'Student';
-        assignedTeacherId = doc['assignedTeacherId'];
+        final data = doc.data() as Map<String, dynamic>;
+        fullName = data['fullName'] ?? 'Student';
+        assignedTeacherId = data['assignedTeacherId'];
+        // Fetch profile picture URL, checking both profilePictureUrl and avatarUrl fields
+        profilePictureUrl =
+            data['profilePictureUrl'] ??
+            data['avatarUrl'] ??
+            'https://i.pravatar.cc/150?u=${user.uid}';
         notifyListeners();
       }
     }
@@ -99,11 +107,13 @@ class StudentHomeScreenMobileProvider extends ChangeNotifier {
         classDateTime = _parseClassDateTime(date, time);
       }
 
-      if (!studentJoined &&
+      final canJoin =
+          !studentJoined &&
           classDateTime != null &&
           now.isAfter(classDateTime.subtract(const Duration(minutes: 5))) &&
-          now.isBefore(classDateTime.add(const Duration(minutes: 10))) &&
-          jitsiRoom.isNotEmpty) {
+          now.isBefore(classDateTime.add(const Duration(minutes: 10)));
+
+      if (canJoin && jitsiRoom.isNotEmpty) {
         joinableClass = {...data, 'id': doc.id};
         hasJoined = false;
         notifyListeners();
@@ -111,6 +121,7 @@ class StudentHomeScreenMobileProvider extends ChangeNotifier {
       }
     }
     joinableClass = null;
+    hasJoined = false;
     notifyListeners();
   }
 
@@ -149,27 +160,37 @@ class StudentHomeScreenMobileProvider extends ChangeNotifier {
     try {
       final jitsiRoom = joinableClass!['jitsiRoom'] ?? '';
       if (jitsiRoom.isEmpty) throw 'No Jitsi room found.';
+
+      // For web, use your web Jitsi integration here.
+      // await JitsiMeet().join(options); // For mobile, for web use your own logic
+
+      // Only mark as joined after successful join
       await FirebaseFirestore.instance
           .collection('classes')
           .doc(joinableClass!['id'])
           .update({'studentJoined': true});
       hasJoined = true;
       notifyListeners();
-
-      final options = JitsiMeetConferenceOptions(
-        room: jitsiRoom,
-        userInfo: JitsiMeetUserInfo(displayName: fullName ?? 'Student'),
-        featureFlags: {
-          "welcomepage.enabled": false,
-          "startWithAudioMuted": false,
-          "startWithVideoMuted": false,
-        },
-      );
-      await JitsiMeet().join(options);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to join class: $e')));
     }
+  }
+
+  void setSelectedIndex(int index) {
+    selectedIndex = index;
+    notifyListeners();
+  }
+
+  void navigateToChatTab() {
+    selectedIndex = 3;
+    notifyListeners();
+  }
+
+  void setShowChat(bool value, [Map<String, dynamic>? chat]) {
+    showChat = value;
+    chatData = chat;
+    notifyListeners();
   }
 }

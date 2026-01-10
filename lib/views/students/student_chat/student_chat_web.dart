@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../components/students/chats.dart';
-import '../../../providers/students/student_chat_web_provider.dart';
+import '../../../providers/students/chat/student_chat_web_provider.dart';
 import 'optimized_student_chat_web_widget.dart';
 
 class StudentChatWebView extends StatelessWidget {

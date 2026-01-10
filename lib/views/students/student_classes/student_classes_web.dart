@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_classes_web_provider.dart';
+import '../../../providers/students/classes/student_classes_web_provider.dart';
 import '../../../services/notification_service.dart';
 import '../student_notifications/student_notifications.dart';
 

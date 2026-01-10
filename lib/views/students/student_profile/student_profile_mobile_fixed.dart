@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/students/student_profile_mobile_provider.dart';
+import '../../../providers/students/profile/student_profile_mobile_provider.dart';
 import 'student_profile_edit_screen.dart';
 
 class StudentProfileMobile extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_attendance_mobile_provider.dart';
+import '../../../providers/teachers/attendance/teacher_attendance_mobile_provider.dart';
 
 class TeacherAttendanceMobileView extends StatelessWidget {
   final String? selectedValue;

@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../services/chat_service.dart';
-import '../../services/notification_service.dart';
+import '../../../services/chat_service.dart';
+import '../../../services/notification_service.dart';
 
 class TeacherChatWebProvider extends ChangeNotifier {
   int? selectedChatIndex;

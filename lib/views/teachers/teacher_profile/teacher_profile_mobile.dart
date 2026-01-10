@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/colors.dart';
-import '../../../providers/teachers/teacher_profile_mobile_provider.dart';
+import '../../../providers/teachers/profile/teacher_profile_mobile_provider.dart';
 
 class TeacherProfileMobile extends StatelessWidget {
   const TeacherProfileMobile({super.key});
