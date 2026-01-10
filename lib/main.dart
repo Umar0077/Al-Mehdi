@@ -4,10 +4,10 @@ import 'package:al_mehdi_online_school/services/deep_link_service.dart';
 import 'package:al_mehdi_online_school/services/remote_config_service.dart';
 import 'package:al_mehdi_online_school/services/session_helper.dart';
 import 'package:al_mehdi_online_school/services/theme_service.dart';
-import 'package:al_mehdi_online_school/students/student_home_screen/student_home_screen.dart';
-import 'package:al_mehdi_online_school/teachers/teacher_home_screen/teacher_home_screen.dart';
+import 'package:al_mehdi_online_school/views/students/student_home_screen/student_home_screen.dart';
+import 'package:al_mehdi_online_school/views/teachers/teacher_home_screen/teacher_home_screen.dart';
 import 'package:al_mehdi_online_school/views/admin_dashboard/admin_home_view.dart';
-import 'package:al_mehdi_online_school/views/auth_views/login_screen.dart';
+import 'package:al_mehdi_online_school/views/authentication/login_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart'
@@ -21,9 +21,9 @@ import 'firebase_options.dart'; // ✅ Import generated config
 import 'providers/unassigned_user_screens/admin_home_provider.dart';
 import 'services/notification_service.dart';
 import 'services/onboarding_service.dart';
-import 'views/StartingScreens/onboarding_screen.dart';
-import 'views/StartingScreens/splash_screen.dart';
-import 'views/auth_views/Main_page.dart';
+import 'views/authentication/auth_view.dart';
+import 'views/onboarding/onboarding_view.dart';
+import 'views/splash/splash_view.dart';
 
 // ✅ Global theme notifier
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
@@ -255,7 +255,7 @@ class _AppInitializerState extends State<AppInitializer> {
         // If neither role found, fallback to login
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginView()),
         );
       } else {
         // User not logged in - check if they've seen onboarding
@@ -267,7 +267,7 @@ class _AppInitializerState extends State<AppInitializer> {
               builder:
                   (context) => ChangeNotifierProvider(
                     create: (_) => OnboardingProvider(),
-                    child: const OnboardingScreen(),
+                    child: const OnboardingView(),
                   ),
             ),
           );
@@ -275,7 +275,7 @@ class _AppInitializerState extends State<AppInitializer> {
           // Returning user - go directly to login
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const LoginScreen()),
+            MaterialPageRoute(builder: (context) => const LoginView()),
           );
         }
       }
@@ -285,7 +285,7 @@ class _AppInitializerState extends State<AppInitializer> {
         // User is logged in, go to MainPage
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const MainPage()),
+          MaterialPageRoute(builder: (context) => const AuthView()),
         );
       } else {
         // User not logged in - check if they've seen onboarding
@@ -297,7 +297,7 @@ class _AppInitializerState extends State<AppInitializer> {
               builder:
                   (context) => ChangeNotifierProvider(
                     create: (_) => OnboardingProvider(),
-                    child: const OnboardingScreen(),
+                    child: const OnboardingView(),
                   ),
             ),
           );
@@ -305,7 +305,7 @@ class _AppInitializerState extends State<AppInitializer> {
           // Returning user - go directly to MainPage (which will handle auth check)
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainPage()),
+            MaterialPageRoute(builder: (context) => const AuthView()),
           );
         }
       }
@@ -314,6 +314,6 @@ class _AppInitializerState extends State<AppInitializer> {
 
   @override
   Widget build(BuildContext context) {
-    return const SplashScreen();
+    return const SplashView();
   }
 }

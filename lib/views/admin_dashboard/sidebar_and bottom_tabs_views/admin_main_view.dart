@@ -3,7 +3,7 @@ import 'package:al_mehdi_online_school/views/admin_dashboard/sidebar_and%20botto
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../components/custom_bottom_nabigator.dart';
+import '../../../components/custom_bottom_navbar.dart';
 import '../../../providers/admin/admin_main_screen_provider.dart';
 import '../admin_home_view.dart';
 import 'attendance_view.dart';

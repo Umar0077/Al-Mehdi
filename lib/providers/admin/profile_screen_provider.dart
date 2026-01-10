@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:typed_data';
-import '../../components/teacher_image_picker.dart';
+import 'package:flutter/material.dart';
+
+import '../../components/teachers/teacher_image_picker.dart';
 
 class ProfileScreenProvider extends ChangeNotifier {
   String fullName = '';

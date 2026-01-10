@@ -1,4 +1,4 @@
-import 'package:al_mehdi_online_school/views/auth_views/login_screen.dart';
+import 'package:al_mehdi_online_school/views/authentication/login_view.dart';
 import 'package:flutter/material.dart';
 
 class WaitForAssignmentView extends StatelessWidget {
@@ -20,7 +20,7 @@ class WaitForAssignmentView extends StatelessWidget {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
+              MaterialPageRoute(builder: (context) => LoginView()),
             );
           },
         ),

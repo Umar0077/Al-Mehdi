@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../../constants/colors.dart';
 import '../../main.dart';
-import '../../views/auth_views/login_screen.dart';
 import '../../services/session_helper.dart';
 import '../../services/theme_service.dart';
-import '../../constants/colors.dart';
+import '../../views/authentication/login_view.dart';
 
 class AdminSettingsProvider extends ChangeNotifier {
   bool notificationsEnabled = true;
@@ -97,7 +98,7 @@ class AdminSettingsProvider extends ChangeNotifier {
       if (context.mounted) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => const LoginView()),
           (route) => false,
         );
 

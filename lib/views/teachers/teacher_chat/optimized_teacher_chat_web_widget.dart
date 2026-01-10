@@ -1,0 +1,467 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../constants/colors.dart';
+import '../../../providers/teachers/teacher_chat_web_provider.dart';
+import '../../../services/chat_service.dart';
+
+class OptimizedTeacherChatWebWidget extends StatefulWidget {
+  final Map<String, dynamic> chat;
+  final bool showHeader;
+
+  const OptimizedTeacherChatWebWidget({
+    super.key,
+    required this.chat,
+    this.showHeader = true,
+  });
+
+  @override
+  State<OptimizedTeacherChatWebWidget> createState() =>
+      _OptimizedTeacherChatWebWidgetState();
+}
+
+class _OptimizedTeacherChatWebWidgetState
+    extends State<OptimizedTeacherChatWebWidget> {
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  String? currentUserId;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+    // Mark messages as read when chat is opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _markMessagesAsRead();
+    });
+  }
+
+  Future<void> _markMessagesAsRead() async {
+    final studentId = widget.chat['studentId'];
+    if (studentId != null && currentUserId != null) {
+      final chatRoomId = ChatService.getChatRoomId(currentUserId!, studentId);
+      await ChatService.markMessagesAsRead(chatRoomId, currentUserId!);
+    }
+  }
+
+  void _sendMessageFast() async {
+    if (_messageController.text.trim().isEmpty) return;
+
+    final message = _messageController.text.trim();
+    final studentId = widget.chat['studentId'];
+    final provider = Provider.of<TeacherChatWebProvider>(
+      context,
+      listen: false,
+    );
+
+    if (studentId == null) return;
+
+    // Clear input immediately for better UX
+    _messageController.clear();
+
+    // Scroll to bottom immediately
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+
+    if (kDebugMode) {
+      print('📤 Teacher web sending message optimistically: $message');
+    }
+
+    try {
+      // Use the provider's optimized sending method
+      await provider.sendMessageFast(message, studentId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error sending message: $e');
+      }
+
+      // Show error and restore message for retry
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to send message: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () {
+              _messageController.text = message;
+            },
+          ),
+        ),
+      );
+    }
+  }
+
+  String _formatTime(Timestamp? timestamp) {
+    if (timestamp == null) return 'Now';
+
+    final now = DateTime.now();
+    final messageTime = timestamp.toDate();
+    final difference = now.difference(messageTime);
+
+    if (difference.inMinutes < 1) {
+      return 'Now';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes}m ago';
+    } else if (difference.inHours < 24) {
+      return '${difference.inHours}h ago';
+    } else {
+      return '${messageTime.day}/${messageTime.month}/${messageTime.year}';
+    }
+  }
+
+  Widget _buildMessageBubble({
+    required String message,
+    required bool isMe,
+    required String time,
+    String? status, // For optimistic messages
+    String? tempId, // For retry functionality
+  }) {
+    Color meColor =
+        Theme.of(context).brightness == Brightness.dark
+            ? appGreen
+            : appLightGreen;
+
+    Color fromColor =
+        Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey.shade800
+            : Colors.grey.shade200;
+
+    return Align(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        constraints: BoxConstraints(
+          maxWidth:
+              MediaQuery.of(context).size.width *
+              0.6, // Responsive width for web
+        ),
+        decoration: BoxDecoration(
+          color: isMe ? meColor : fromColor,
+          borderRadius: BorderRadius.circular(12),
+          border:
+              status == 'failed'
+                  ? Border.all(color: Colors.red, width: 1)
+                  : null,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(message, style: const TextStyle(fontSize: 15)),
+                ),
+                const SizedBox(width: 8),
+                Text(time, style: const TextStyle(fontSize: 12)),
+              ],
+            ),
+            if (isMe && status != null) ...[
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (status == 'sending') ...[
+                    const SizedBox(
+                      width: 12,
+                      height: 12,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 4),
+                    const Text('Sending...', style: TextStyle(fontSize: 10)),
+                  ] else if (status == 'sent') ...[
+                    const Icon(Icons.check, size: 12, color: Colors.green),
+                    const SizedBox(width: 4),
+                    const Text('Sent', style: TextStyle(fontSize: 10)),
+                  ] else if (status == 'failed' && tempId != null) ...[
+                    const Icon(
+                      Icons.error_outline,
+                      size: 12,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(width: 4),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final provider = Provider.of<TeacherChatWebProvider>(
+                            context,
+                            listen: false,
+                          );
+                          await provider.retryMessage(tempId);
+                        },
+                        child: const Text(
+                          'Retry',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.red,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final studentId = widget.chat['studentId'];
+
+    if (studentId == null || currentUserId == null) {
+      return const Center(child: Text('Unable to load chat'));
+    }
+
+    return Consumer<TeacherChatWebProvider>(
+      builder: (context, provider, child) {
+        return Column(
+          children: [
+            if (widget.showHeader)
+              // Chat header for web
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 17,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  border: const Border(
+                    bottom: BorderSide(color: Color(0xFFE5EAF1), width: 1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage:
+                          (widget.chat['avatar'] ?? '').isNotEmpty
+                              ? NetworkImage(widget.chat['avatar'] ?? '')
+                              : null,
+                      backgroundColor:
+                          (widget.chat['avatar'] ?? '').isNotEmpty
+                              ? null
+                              : Colors.green,
+                      radius: 20,
+                      child:
+                          (widget.chat['avatar'] ?? '').isEmpty
+                              ? Icon(
+                                Icons.person,
+                                color: Colors.white,
+                                size: 22,
+                              )
+                              : null,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.chat['name'] ?? '',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          if (widget.chat['online'] == true)
+                            const Text(
+                              'Online',
+                              style: TextStyle(
+                                color: appGreen,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            // Chat messages
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: ChatService.getMessages(currentUserId!, studentId),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  List<Widget> messageWidgets = [];
+
+                  // Add Firestore messages
+                  if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+                    final messages = snapshot.data!.docs;
+                    final sortedMessages = [...messages];
+                    sortedMessages.sort((a, b) {
+                      final aTime = a['timestamp'] as Timestamp?;
+                      final bTime = b['timestamp'] as Timestamp?;
+                      return (aTime?.toDate() ?? DateTime(1970)).compareTo(
+                        bTime?.toDate() ?? DateTime(1970),
+                      );
+                    });
+
+                    for (var message in sortedMessages) {
+                      final msg = message.data() as Map<String, dynamic>;
+                      final isMe = msg['senderId'] == currentUserId;
+
+                      messageWidgets.add(
+                        _buildMessageBubble(
+                          message: msg['message'] ?? '',
+                          isMe: isMe,
+                          time: _formatTime(msg['timestamp'] as Timestamp?),
+                        ),
+                      );
+                    }
+                  }
+
+                  // Add local optimistic messages
+                  for (var localMessage in provider.localMessages) {
+                    final tempId = localMessage['tempId'] as String;
+                    final status = provider.messageStatus[tempId];
+
+                    messageWidgets.add(
+                      _buildMessageBubble(
+                        message: localMessage['message'] ?? '',
+                        isMe: true,
+                        time: _formatTime(
+                          localMessage['timestamp'] as Timestamp?,
+                        ),
+                        status: status,
+                        tempId: tempId,
+                      ),
+                    );
+                  }
+
+                  if (messageWidgets.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No messages yet. Start the conversation!',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    );
+                  }
+
+                  // Auto-scroll to bottom when new messages arrive
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(
+                        _scrollController.position.maxScrollExtent,
+                      );
+                    }
+                  });
+
+                  return ListView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 5,
+                    ),
+                    children: messageWidgets,
+                  );
+                },
+              ),
+            ),
+            // Message input for web
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                border: const Border(
+                  top: BorderSide(color: Color(0xFFE5EAF1), width: 1),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _messageController,
+                      cursorColor: appGreen,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      decoration: InputDecoration(
+                        hintText: 'Type your message...',
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: const BorderSide(
+                            color: appGreen,
+                            width: 2.0,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                            width: 1.0,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
+                      ),
+                      onSubmitted: (_) => _sendMessageFast(),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: provider.isSending ? Colors.grey : appGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon:
+                          provider.isSending
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                              : const Icon(Icons.send, color: Colors.white),
+                      onPressed: provider.isSending ? null : _sendMessageFast,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+}
