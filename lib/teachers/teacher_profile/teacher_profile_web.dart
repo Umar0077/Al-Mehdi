@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
+
 import '../../../constants/colors.dart';
-import '../../students/student_notifications/student_notifications.dart';
 import '../../components/teacher_image_picker.dart';
 import '../../services/notification_service.dart';
-import '../../../Screens/AdminDashboard/Unassigned Users Screens/Degree_Preview_Screen.dart';
-import 'package:provider/provider.dart';
+import '../../students/student_notifications/student_notifications.dart';
+import '../../views/admin_dashboard/unassigned_users_view/degree_preview_view.dart';
 import 'teacher_profile_web_provider.dart';
 
 class TeacherProfileWeb extends StatelessWidget {
@@ -44,11 +45,17 @@ class TeacherProfileWeb extends StatelessWidget {
                             const Spacer(),
                             // Notification Icon with badge
                             StreamBuilder<QuerySnapshot>(
-                              stream: NotificationService.getNotificationsStream(),
+                              stream:
+                                  NotificationService.getNotificationsStream(),
                               builder: (context, snapshot) {
                                 int unreadCount = 0;
                                 if (snapshot.hasData) {
-                                  unreadCount = snapshot.data!.docs.where((doc) => !(doc['read'] ?? false)).length;
+                                  unreadCount =
+                                      snapshot.data!.docs
+                                          .where(
+                                            (doc) => !(doc['read'] ?? false),
+                                          )
+                                          .length;
                                 }
                                 return Stack(
                                   children: [
@@ -58,7 +65,9 @@ class TeacherProfileWeb extends StatelessWidget {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) => const StudentNotificationScreen(),
+                                            builder:
+                                                (_) =>
+                                                    const StudentNotificationScreen(),
                                           ),
                                         );
                                       },
@@ -91,7 +100,8 @@ class TeacherProfileWeb extends StatelessWidget {
                           children: [
                             Expanded(
                               child: SizedBox(
-                                height: MediaQuery.of(context).size.height - 150,
+                                height:
+                                    MediaQuery.of(context).size.height - 150,
                                 child: Card(
                                   color: Theme.of(context).cardColor,
                                   shadowColor: Theme.of(context).shadowColor,
@@ -105,51 +115,79 @@ class TeacherProfileWeb extends StatelessWidget {
                                       children: [
                                         CircleAvatar(
                                           radius: 70,
-                                          backgroundImage: provider.uploadedImageBytes != null
-                                              ? MemoryImage(provider.uploadedImageBytes!)
-                                              : (provider.profilePictureUrl.isNotEmpty
-                                                  ? NetworkImage(provider.profilePictureUrl)
-                                                  as ImageProvider
-                                                  : null),
-                                          backgroundColor: provider.uploadedImageBytes == null && provider.profilePictureUrl.isEmpty
-                                              ? appGreen
-                                              : null,
-                                          child: provider.uploadedImageBytes == null && provider.profilePictureUrl.isEmpty
-                                              ? const Icon(
-                                                  Icons.person,
-                                                  size: 50,
-                                                  color: Colors.white,
-                                                )
-                                              : null,
+                                          backgroundImage:
+                                              provider.uploadedImageBytes !=
+                                                      null
+                                                  ? MemoryImage(
+                                                    provider
+                                                        .uploadedImageBytes!,
+                                                  )
+                                                  : (provider
+                                                          .profilePictureUrl
+                                                          .isNotEmpty
+                                                      ? NetworkImage(
+                                                            provider
+                                                                .profilePictureUrl,
+                                                          )
+                                                          as ImageProvider
+                                                      : null),
+                                          backgroundColor:
+                                              provider.uploadedImageBytes ==
+                                                          null &&
+                                                      provider
+                                                          .profilePictureUrl
+                                                          .isEmpty
+                                                  ? appGreen
+                                                  : null,
+                                          child:
+                                              provider.uploadedImageBytes ==
+                                                          null &&
+                                                      provider
+                                                          .profilePictureUrl
+                                                          .isEmpty
+                                                  ? const Icon(
+                                                    Icons.person,
+                                                    size: 50,
+                                                    color: Colors.white,
+                                                  )
+                                                  : null,
                                         ),
                                         const SizedBox(height: 10),
                                         TextButton(
-                                          onPressed: provider.isUploadingProfile
-                                              ? null
-                                              : () => provider.handleImageUpload(
-                                                    context,
-                                                    pickImagePlatform,
+                                          onPressed:
+                                              provider.isUploadingProfile
+                                                  ? null
+                                                  : () => provider
+                                                      .handleImageUpload(
+                                                        context,
+                                                        pickImagePlatform,
+                                                      ),
+                                          child:
+                                              provider.isUploadingProfile
+                                                  ? const SizedBox(
+                                                    width: 16,
+                                                    height: 16,
+                                                    child: CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                            Color
+                                                          >(appGreen),
+                                                    ),
+                                                  )
+                                                  : const Text(
+                                                    "Upload",
+                                                    style: TextStyle(
+                                                      color: appGreen,
+                                                      fontSize: 15,
+                                                    ),
                                                   ),
-                                          child: provider.isUploadingProfile
-                                              ? const SizedBox(
-                                                  width: 16,
-                                                  height: 16,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    valueColor: AlwaysStoppedAnimation<Color>(appGreen),
-                                                  ),
-                                                )
-                                              : const Text(
-                                                  "Upload",
-                                                  style: TextStyle(
-                                                    color: appGreen,
-                                                    fontSize: 15,
-                                                  ),
-                                                ),
                                         ),
                                         const SizedBox(height: 20),
                                         Text(
-                                          provider.fullName.isNotEmpty ? provider.fullName : 'Loading...',
+                                          provider.fullName.isNotEmpty
+                                              ? provider.fullName
+                                              : 'Loading...',
                                           style: const TextStyle(
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
@@ -162,9 +200,13 @@ class TeacherProfileWeb extends StatelessWidget {
                                         ),
                                         const SizedBox(height: 10),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: const [
-                                            Icon(Iconsax.verify, color: appGreen),
+                                            Icon(
+                                              Iconsax.verify,
+                                              color: appGreen,
+                                            ),
                                             SizedBox(width: 5),
                                             Text(
                                               "Assigned",
@@ -181,7 +223,8 @@ class TeacherProfileWeb extends StatelessWidget {
                             const SizedBox(width: 20),
                             Expanded(
                               child: SizedBox(
-                                height: MediaQuery.of(context).size.height - 150,
+                                height:
+                                    MediaQuery.of(context).size.height - 150,
                                 child: Card(
                                   shadowColor: Theme.of(context).shadowColor,
                                   color: Theme.of(context).cardColor,
@@ -193,24 +236,51 @@ class TeacherProfileWeb extends StatelessWidget {
                                     padding: const EdgeInsets.all(16.0),
                                     child: SingleChildScrollView(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           const SizedBox(height: 20),
                                           if (!provider.isEditMode) ...[
-                                            buildField("Full Name", provider.fullName.isNotEmpty ? provider.fullName : 'Loading...'),
-                                            buildField("Email", provider.email.isNotEmpty ? provider.email : 'Loading...'),
-                                            buildField("Phone", provider.phone.isNotEmpty ? provider.phone : 'Loading...'),
-                                            buildField("Degree", provider.degree.isNotEmpty ? provider.degree : 'Loading...'),
-                                            if (provider.degreeProofUrl.isNotEmpty)
+                                            buildField(
+                                              "Full Name",
+                                              provider.fullName.isNotEmpty
+                                                  ? provider.fullName
+                                                  : 'Loading...',
+                                            ),
+                                            buildField(
+                                              "Email",
+                                              provider.email.isNotEmpty
+                                                  ? provider.email
+                                                  : 'Loading...',
+                                            ),
+                                            buildField(
+                                              "Phone",
+                                              provider.phone.isNotEmpty
+                                                  ? provider.phone
+                                                  : 'Loading...',
+                                            ),
+                                            buildField(
+                                              "Degree",
+                                              provider.degree.isNotEmpty
+                                                  ? provider.degree
+                                                  : 'Loading...',
+                                            ),
+                                            if (provider
+                                                .degreeProofUrl
+                                                .isNotEmpty)
                                               Padding(
-                                                padding: const EdgeInsets.only(bottom: 14.0),
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 14.0,
+                                                ),
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     const Text(
                                                       'Degree Proof',
                                                       style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         color: appGrey,
                                                       ),
                                                     ),
@@ -220,25 +290,51 @@ class TeacherProfileWeb extends StatelessWidget {
                                                         Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                            builder: (_) => DegreePreviewScreen(imageUrl: provider.degreeProofUrl),
+                                                            builder:
+                                                                (
+                                                                  _,
+                                                                ) => DegreePreviewView(
+                                                                  imageUrl:
+                                                                      provider
+                                                                          .degreeProofUrl,
+                                                                ),
                                                           ),
                                                         );
                                                       },
                                                       child: Container(
                                                         width: double.infinity,
-                                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 14,
+                                                              vertical: 14,
+                                                            ),
                                                         decoration: BoxDecoration(
-                                                          color: Theme.of(context).cardColor,
-                                                          border: Border.all(color: appGrey),
-                                                          borderRadius: BorderRadius.circular(10),
+                                                          color:
+                                                              Theme.of(
+                                                                context,
+                                                              ).cardColor,
+                                                          border: Border.all(
+                                                            color: appGrey,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
                                                         ),
                                                         child: Row(
                                                           children: const [
-                                                            Icon(Icons.picture_as_pdf, color: appGreen),
+                                                            Icon(
+                                                              Icons
+                                                                  .picture_as_pdf,
+                                                              color: appGreen,
+                                                            ),
                                                             SizedBox(width: 8),
                                                             Text(
                                                               'View Degree Proof',
-                                                              style: TextStyle(fontSize: 14, color: appGreen),
+                                                              style: TextStyle(
+                                                                fontSize: 14,
+                                                                color: appGreen,
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
@@ -249,19 +345,34 @@ class TeacherProfileWeb extends StatelessWidget {
                                               ),
                                           ] else ...[
                                             // Edit mode fields
-                                            buildEditField("Full Name", provider.fullNameController),
-                                            buildEditField("Phone", provider.phoneController),
-                                            buildDegreeDropdown(context, provider),
-                                            if (provider.degreeProofUrl.isNotEmpty)
+                                            buildEditField(
+                                              "Full Name",
+                                              provider.fullNameController,
+                                            ),
+                                            buildEditField(
+                                              "Phone",
+                                              provider.phoneController,
+                                            ),
+                                            buildDegreeDropdown(
+                                              context,
+                                              provider,
+                                            ),
+                                            if (provider
+                                                .degreeProofUrl
+                                                .isNotEmpty)
                                               Padding(
-                                                padding: const EdgeInsets.only(bottom: 14.0),
+                                                padding: const EdgeInsets.only(
+                                                  bottom: 14.0,
+                                                ),
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     const Text(
                                                       'Current Degree Proof',
                                                       style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         color: appGrey,
                                                       ),
                                                     ),
@@ -271,25 +382,51 @@ class TeacherProfileWeb extends StatelessWidget {
                                                         Navigator.push(
                                                           context,
                                                           MaterialPageRoute(
-                                                            builder: (_) => DegreePreviewScreen(imageUrl: provider.degreeProofUrl),
+                                                            builder:
+                                                                (
+                                                                  _,
+                                                                ) => DegreePreviewView(
+                                                                  imageUrl:
+                                                                      provider
+                                                                          .degreeProofUrl,
+                                                                ),
                                                           ),
                                                         );
                                                       },
                                                       child: Container(
                                                         width: double.infinity,
-                                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                                                        padding:
+                                                            const EdgeInsets.symmetric(
+                                                              horizontal: 14,
+                                                              vertical: 14,
+                                                            ),
                                                         decoration: BoxDecoration(
-                                                          color: Theme.of(context).cardColor,
-                                                          border: Border.all(color: appGrey),
-                                                          borderRadius: BorderRadius.circular(10),
+                                                          color:
+                                                              Theme.of(
+                                                                context,
+                                                              ).cardColor,
+                                                          border: Border.all(
+                                                            color: appGrey,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
                                                         ),
                                                         child: Row(
                                                           children: const [
-                                                            Icon(Icons.picture_as_pdf, color: appGreen),
+                                                            Icon(
+                                                              Icons
+                                                                  .picture_as_pdf,
+                                                              color: appGreen,
+                                                            ),
                                                             SizedBox(width: 8),
                                                             Text(
                                                               'View Current Degree Proof',
-                                                              style: TextStyle(fontSize: 14, color: appGreen),
+                                                              style: TextStyle(
+                                                                fontSize: 14,
+                                                                color: appGreen,
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
@@ -300,22 +437,45 @@ class TeacherProfileWeb extends StatelessWidget {
                                               ),
                                             const Text(
                                               'Upload New Degree Proof (Optional)',
-                                              style: TextStyle(fontWeight: FontWeight.bold, color: appGrey),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: appGrey,
+                                              ),
                                             ),
                                             const SizedBox(height: 6),
                                             SizedBox(
                                               width: double.infinity,
                                               child: OutlinedButton.icon(
-                                                onPressed: provider.pickDocument,
-                                                icon: const Icon(Icons.upload_file, color: appGreen),
+                                                onPressed:
+                                                    provider.pickDocument,
+                                                icon: const Icon(
+                                                  Icons.upload_file,
+                                                  color: appGreen,
+                                                ),
                                                 label: Text(
-                                                  provider.newDegreeFile != null ? provider.newDegreeFile!.name : 'Upload New Degree Document',
-                                                  style: const TextStyle(color: appGreen),
+                                                  provider.newDegreeFile != null
+                                                      ? provider
+                                                          .newDegreeFile!
+                                                          .name
+                                                      : 'Upload New Degree Document',
+                                                  style: const TextStyle(
+                                                    color: appGreen,
+                                                  ),
                                                 ),
                                                 style: OutlinedButton.styleFrom(
-                                                  side: const BorderSide(color: appGreen),
-                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                                  side: const BorderSide(
+                                                    color: appGreen,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 14,
+                                                      ),
                                                 ),
                                               ),
                                             ),
@@ -325,38 +485,91 @@ class TeacherProfileWeb extends StatelessWidget {
                                             builder: (context, constraints) {
                                               if (constraints.maxWidth > 300) {
                                                 return Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     if (!provider.isEditMode)
                                                       TextButton(
                                                         onPressed: () {},
-                                                        child: const Text("", style: TextStyle(color: appGreen)),
+                                                        child: const Text(
+                                                          "",
+                                                          style: TextStyle(
+                                                            color: appGreen,
+                                                          ),
+                                                        ),
                                                       )
                                                     else
                                                       TextButton(
-                                                        onPressed: provider.cancelEdit,
-                                                        child: const Text("Cancel", style: TextStyle(color: Colors.red)),
+                                                        onPressed:
+                                                            provider.cancelEdit,
+                                                        child: const Text(
+                                                          "Cancel",
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
                                                       ),
                                                     if (!provider.isEditMode)
                                                       ElevatedButton(
-                                                        onPressed: provider.toggleEditMode,
-                                                        style: ElevatedButton.styleFrom(backgroundColor: appGreen, foregroundColor: Colors.white),
-                                                        child: const Text("Edit Profile", style: TextStyle(fontSize: 16)),
+                                                        onPressed:
+                                                            provider
+                                                                .toggleEditMode,
+                                                        style:
+                                                            ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  appGreen,
+                                                              foregroundColor:
+                                                                  Colors.white,
+                                                            ),
+                                                        child: const Text(
+                                                          "Edit Profile",
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                          ),
+                                                        ),
                                                       )
                                                     else
                                                       ElevatedButton(
-                                                        onPressed: provider.isSubmitting ? null : () => provider.updateProfile(context),
-                                                        style: ElevatedButton.styleFrom(backgroundColor: appGreen, foregroundColor: Colors.white),
-                                                        child: provider.isSubmitting
-                                                            ? const SizedBox(
-                                                                width: 16,
-                                                                height: 16,
-                                                                child: CircularProgressIndicator(
-                                                                  strokeWidth: 2,
-                                                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                        onPressed:
+                                                            provider.isSubmitting
+                                                                ? null
+                                                                : () => provider
+                                                                    .updateProfile(
+                                                                      context,
+                                                                    ),
+                                                        style:
+                                                            ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  appGreen,
+                                                              foregroundColor:
+                                                                  Colors.white,
+                                                            ),
+                                                        child:
+                                                            provider.isSubmitting
+                                                                ? const SizedBox(
+                                                                  width: 16,
+                                                                  height: 16,
+                                                                  child: CircularProgressIndicator(
+                                                                    strokeWidth:
+                                                                        2,
+                                                                    valueColor:
+                                                                        AlwaysStoppedAnimation<
+                                                                          Color
+                                                                        >(
+                                                                          Colors
+                                                                              .white,
+                                                                        ),
+                                                                  ),
+                                                                )
+                                                                : const Text(
+                                                                  "Save Changes",
+                                                                  style:
+                                                                      TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                      ),
                                                                 ),
-                                                              )
-                                                            : const Text("Save Changes", style: TextStyle(fontSize: 16)),
                                                       ),
                                                   ],
                                                 );
@@ -366,15 +579,37 @@ class TeacherProfileWeb extends StatelessWidget {
                                                     if (!provider.isEditMode)
                                                       TextButton(
                                                         onPressed: () {},
-                                                        child: const Text("Change Password", style: TextStyle(color: appGreen)),
+                                                        child: const Text(
+                                                          "Change Password",
+                                                          style: TextStyle(
+                                                            color: appGreen,
+                                                          ),
+                                                        ),
                                                       ),
-                                                    if (!provider.isEditMode) const SizedBox(height: 10),
+                                                    if (!provider.isEditMode)
+                                                      const SizedBox(
+                                                        height: 10,
+                                                      ),
                                                     if (!provider.isEditMode)
                                                       Center(
                                                         child: ElevatedButton(
-                                                          onPressed: provider.toggleEditMode,
-                                                          style: ElevatedButton.styleFrom(backgroundColor: appGreen, foregroundColor: Colors.white),
-                                                          child: const Text("Edit Profile", style: TextStyle(fontSize: 16)),
+                                                          onPressed:
+                                                              provider
+                                                                  .toggleEditMode,
+                                                          style:
+                                                              ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    appGreen,
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                              ),
+                                                          child: const Text(
+                                                            "Edit Profile",
+                                                            style: TextStyle(
+                                                              fontSize: 16,
+                                                            ),
+                                                          ),
                                                         ),
                                                       )
                                                     else
@@ -382,25 +617,62 @@ class TeacherProfileWeb extends StatelessWidget {
                                                         children: [
                                                           Center(
                                                             child: TextButton(
-                                                              onPressed: provider.cancelEdit,
-                                                              child: const Text("Cancel", style: TextStyle(color: Colors.red)),
+                                                              onPressed:
+                                                                  provider
+                                                                      .cancelEdit,
+                                                              child: const Text(
+                                                                "Cancel",
+                                                                style: TextStyle(
+                                                                  color:
+                                                                      Colors
+                                                                          .red,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
-                                                          const SizedBox(height: 10),
+                                                          const SizedBox(
+                                                            height: 10,
+                                                          ),
                                                           Center(
                                                             child: ElevatedButton(
-                                                              onPressed: provider.isSubmitting ? null : () => provider.updateProfile(context),
-                                                              style: ElevatedButton.styleFrom(backgroundColor: appGreen, foregroundColor: Colors.white),
-                                                              child: provider.isSubmitting
-                                                                  ? const SizedBox(
-                                                                      width: 16,
-                                                                      height: 16,
-                                                                      child: CircularProgressIndicator(
-                                                                        strokeWidth: 2,
-                                                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                                              onPressed:
+                                                                  provider.isSubmitting
+                                                                      ? null
+                                                                      : () => provider
+                                                                          .updateProfile(
+                                                                            context,
+                                                                          ),
+                                                              style: ElevatedButton.styleFrom(
+                                                                backgroundColor:
+                                                                    appGreen,
+                                                                foregroundColor:
+                                                                    Colors
+                                                                        .white,
+                                                              ),
+                                                              child:
+                                                                  provider.isSubmitting
+                                                                      ? const SizedBox(
+                                                                        width:
+                                                                            16,
+                                                                        height:
+                                                                            16,
+                                                                        child: CircularProgressIndicator(
+                                                                          strokeWidth:
+                                                                              2,
+                                                                          valueColor: AlwaysStoppedAnimation<
+                                                                            Color
+                                                                          >(
+                                                                            Colors.white,
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                      : const Text(
+                                                                        "Save Changes",
+                                                                        style: TextStyle(
+                                                                          fontSize:
+                                                                              16,
+                                                                        ),
                                                                       ),
-                                                                    )
-                                                                  : const Text("Save Changes", style: TextStyle(fontSize: 16)),
                                                             ),
                                                           ),
                                                         ],
@@ -490,14 +762,23 @@ class TeacherProfileWeb extends StatelessWidget {
     );
   }
 
-  Widget buildDegreeDropdown(BuildContext context, TeacherProfileWebProvider provider) {
-    Color dropdownColor = Theme.of(context).brightness == Brightness.dark ? darkBackground : appLightGreen;
+  Widget buildDegreeDropdown(
+    BuildContext context,
+    TeacherProfileWebProvider provider,
+  ) {
+    Color dropdownColor =
+        Theme.of(context).brightness == Brightness.dark
+            ? darkBackground
+            : appLightGreen;
     return Padding(
       padding: const EdgeInsets.only(bottom: 14.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Degree', style: TextStyle(fontWeight: FontWeight.bold, color: appGrey)),
+          const Text(
+            'Degree',
+            style: TextStyle(fontWeight: FontWeight.bold, color: appGrey),
+          ),
           const SizedBox(height: 6),
           Container(
             width: double.infinity,
@@ -508,32 +789,52 @@ class TeacherProfileWeb extends StatelessWidget {
             ),
             child: DropdownButton<String>(
               underline: const SizedBox.shrink(),
-              value: provider.selectedDegree?.isNotEmpty == true ? provider.selectedDegree : (provider.degree.isNotEmpty ? provider.degree : null),
+              value:
+                  provider.selectedDegree?.isNotEmpty == true
+                      ? provider.selectedDegree
+                      : (provider.degree.isNotEmpty ? provider.degree : null),
               hint: Text(
-                provider.selectedDegree?.isNotEmpty == true ? provider.selectedDegree! : (provider.degree.isNotEmpty ? provider.degree : 'Select your degree'),
+                provider.selectedDegree?.isNotEmpty == true
+                    ? provider.selectedDegree!
+                    : (provider.degree.isNotEmpty
+                        ? provider.degree
+                        : 'Select your degree'),
                 style: TextStyle(
-                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.grey[600],
+                  color:
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white70
+                          : Colors.grey[600],
                 ),
               ),
               onChanged: (value) => provider.selectedDegree = value,
-              items: provider.degrees
-                  .map((d) => DropdownMenuItem(
-                        value: d,
-                        child: Text(
-                          d,
-                          style: TextStyle(
-                            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+              items:
+                  provider.degrees
+                      .map(
+                        (d) => DropdownMenuItem(
+                          value: d,
+                          child: Text(
+                            d,
+                            style: TextStyle(
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black87,
+                            ),
                           ),
                         ),
-                      ))
-                  .toList(),
+                      )
+                      .toList(),
               isExpanded: true,
               dropdownColor: dropdownColor,
               borderRadius: BorderRadius.circular(12),
               icon: Icon(Icons.arrow_drop_down, color: appGreen),
               iconSize: 24,
               style: TextStyle(
-                color: Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87,
+                color:
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
                 fontSize: 14,
               ),
             ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../main.dart';
-import '../../Screens/Auth Screens/login_screen.dart';
+import '../../views/auth_views/login_screen.dart';
 import '../../services/theme_service.dart';
 
 class TeacherSettingsMobileProvider extends ChangeNotifier {

@@ -1,4 +1,4 @@
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/change%20password.dart';
+import 'package:al_mehdi_online_school/views/auth_views/change%20password.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';

@@ -1,13 +1,13 @@
-import 'package:al_mehdi_online_school/Screens/AdminDashboard/admin_home_screen.dart';
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/login_screen.dart';
 import 'package:al_mehdi_online_school/constants/colors.dart';
-import 'package:al_mehdi_online_school/providers/admin_main_screen_provider.dart';
+import 'package:al_mehdi_online_school/providers/admin/admin_main_screen_provider.dart';
 import 'package:al_mehdi_online_school/services/deep_link_service.dart';
 import 'package:al_mehdi_online_school/services/remote_config_service.dart';
 import 'package:al_mehdi_online_school/services/session_helper.dart';
 import 'package:al_mehdi_online_school/services/theme_service.dart';
 import 'package:al_mehdi_online_school/students/student_home_screen/student_home_screen.dart';
 import 'package:al_mehdi_online_school/teachers/teacher_home_screen/teacher_home_screen.dart';
+import 'package:al_mehdi_online_school/views/admin_dashboard/admin_home_view.dart';
+import 'package:al_mehdi_online_school/views/auth_views/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart'
@@ -17,13 +17,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'Screens/AdminDashboard/admin_home_provider.dart';
-import 'Screens/Auth Screens/Main_page.dart';
-import 'Screens/StartingScreens/onboarding_screen.dart';
-import 'Screens/StartingScreens/splash_screen.dart';
 import 'firebase_options.dart'; // ✅ Import generated config
+import 'providers/unassigned_user_screens/admin_home_provider.dart';
 import 'services/notification_service.dart';
 import 'services/onboarding_service.dart';
+import 'views/StartingScreens/onboarding_screen.dart';
+import 'views/StartingScreens/splash_screen.dart';
+import 'views/auth_views/Main_page.dart';
 
 // ✅ Global theme notifier
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
@@ -208,7 +208,7 @@ class _AppInitializerState extends State<AppInitializer> {
           );
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => AdminHomeScreen()),
+            MaterialPageRoute(builder: (context) => AdminHomeView()),
           );
           return;
         } else {

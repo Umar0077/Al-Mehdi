@@ -1,5 +1,5 @@
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/forgot_password.dart';
-import 'package:al_mehdi_online_school/Screens/support_screen.dart';
+import 'package:al_mehdi_online_school/views/auth_views/forgot_password.dart';
+import 'package:al_mehdi_online_school/views/support_screen.dart';
 import 'package:al_mehdi_online_school/students/student_settings/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';

@@ -1,7 +1,7 @@
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/login_screen.dart';
+import 'package:al_mehdi_online_school/views/auth_views/login_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../constants/colors.dart';
-import '../../Screens/Auth Screens/change password.dart';
+import '../../views/auth_views/change password.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class PreferenceCard extends StatelessWidget {
@@ -57,7 +57,7 @@ class PreferenceCard extends StatelessWidget {
                 Switch(
                   value: darkModeEnabled,
                   onChanged: onDarkModeChanged,
-                  activeColor: appGreen,
+                  activeThumbColor: appGreen,
                   inactiveThumbColor: appGreen,
                   inactiveTrackColor: Theme.of(context).scaffoldBackgroundColor,
                   trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((

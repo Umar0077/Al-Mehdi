@@ -1,4 +1,4 @@
-import 'package:al_mehdi_online_school/Screens/Auth%20Screens/change%20password.dart';
+import 'package:al_mehdi_online_school/views/auth_views/change%20password.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../constants/colors.dart';
@@ -49,7 +49,11 @@ class StudentProfileMobile extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Error loading profile',
@@ -82,7 +86,10 @@ class StudentProfileMobile extends StatelessWidget {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.refresh),
-                  onPressed: provider.isLoading ? null : () => provider.refreshProfile(),
+                  onPressed:
+                      provider.isLoading
+                          ? null
+                          : () => provider.refreshProfile(),
                   tooltip: 'Refresh Profile',
                 ),
               ],
@@ -99,17 +106,17 @@ class StudentProfileMobile extends StatelessWidget {
                       // Enhanced Profile Picture Section
                       _buildProfilePictureSection(context, provider),
                       const SizedBox(height: 24),
-                      
+
                       // Student Information Card
                       _buildInfoCard(context, provider),
                       const SizedBox(height: 20),
-                      
+
                       // Teacher Information Card (if assigned)
                       if (provider.assignedTeacherId != null)
                         _buildTeacherInfoCard(context, provider),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Action Buttons
                       _buildActionButtons(context, provider),
                     ],
@@ -124,7 +131,10 @@ class StudentProfileMobile extends StatelessWidget {
   }
 
   // Enhanced Profile Picture Section
-  Widget _buildProfilePictureSection(BuildContext context, StudentProfileMobileProvider provider) {
+  Widget _buildProfilePictureSection(
+    BuildContext context,
+    StudentProfileMobileProvider provider,
+  ) {
     return Column(
       children: [
         Stack(
@@ -132,14 +142,22 @@ class StudentProfileMobile extends StatelessWidget {
             CircleAvatar(
               radius: 60,
               backgroundColor: Colors.grey.shade200,
-              backgroundImage: provider.selectedImage != null
-                  ? FileImage(provider.selectedImage!)
-                  : (provider.profilePictureUrl.isNotEmpty
-                      ? NetworkImage(provider.profilePictureUrl) as ImageProvider
-                      : null),
-              child: provider.profilePictureUrl.isEmpty && provider.selectedImage == null
-                  ? Icon(Icons.person, size: 60, color: Colors.grey.shade400)
-                  : null,
+              backgroundImage:
+                  provider.selectedImage != null
+                      ? FileImage(provider.selectedImage!)
+                      : (provider.profilePictureUrl.isNotEmpty
+                          ? NetworkImage(provider.profilePictureUrl)
+                              as ImageProvider
+                          : null),
+              child:
+                  provider.profilePictureUrl.isEmpty &&
+                          provider.selectedImage == null
+                      ? Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.grey.shade400,
+                      )
+                      : null,
             ),
             if (provider.isUploading)
               Positioned.fill(
@@ -165,8 +183,15 @@ class StudentProfileMobile extends StatelessWidget {
                   border: Border.all(color: Colors.white, width: 2),
                 ),
                 child: IconButton(
-                  icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                  onPressed: provider.isUploading ? null : () => provider.pickImage(context),
+                  icon: const Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed:
+                      provider.isUploading
+                          ? null
+                          : () => provider.pickImage(context),
                 ),
               ),
             ),
@@ -189,7 +214,10 @@ class StudentProfileMobile extends StatelessWidget {
   }
 
   // Student Information Card
-  Widget _buildInfoCard(BuildContext context, StudentProfileMobileProvider provider) {
+  Widget _buildInfoCard(
+    BuildContext context,
+    StudentProfileMobileProvider provider,
+  ) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -204,10 +232,7 @@ class StudentProfileMobile extends StatelessWidget {
                 const SizedBox(width: 8),
                 const Text(
                   'Personal Information',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -223,7 +248,10 @@ class StudentProfileMobile extends StatelessWidget {
   }
 
   // Teacher Information Card
-  Widget _buildTeacherInfoCard(BuildContext context, StudentProfileMobileProvider provider) {
+  Widget _buildTeacherInfoCard(
+    BuildContext context,
+    StudentProfileMobileProvider provider,
+  ) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -238,18 +266,15 @@ class StudentProfileMobile extends StatelessWidget {
                 const SizedBox(width: 8),
                 const Text(
                   'Assigned Teacher',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             _buildInfoRow(
-              Icons.person_outline, 
-              'Teacher Name', 
-              provider.assignedTeacherName ?? 'Loading...'
+              Icons.person_outline,
+              'Teacher Name',
+              provider.assignedTeacherName ?? 'Loading...',
             ),
           ],
         ),
@@ -258,28 +283,35 @@ class StudentProfileMobile extends StatelessWidget {
   }
 
   // Action Buttons
-  Widget _buildActionButtons(BuildContext context, StudentProfileMobileProvider provider) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    StudentProfileMobileProvider provider,
+  ) {
     return Column(
       children: [
         // Edit Profile Button
         SizedBox(
           width: double.infinity,
           child: ElevatedButton.icon(
-            onPressed: provider.isSaving ? null : () async {
-              final result = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => StudentProfileEditScreen(
-                    currentFullName: provider.fullName,
-                    currentPhone: provider.phone,
-                    currentClass: provider.studentClass,
-                  ),
-                ),
-              );
-              if (result == true) {
-                provider.refreshProfile();
-              }
-            },
+            onPressed:
+                provider.isSaving
+                    ? null
+                    : () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (_) => StudentProfileEditScreen(
+                                currentFullName: provider.fullName,
+                                currentPhone: provider.phone,
+                                currentClass: provider.studentClass,
+                              ),
+                        ),
+                      );
+                      if (result == true) {
+                        provider.refreshProfile();
+                      }
+                    },
             style: ElevatedButton.styleFrom(
               backgroundColor: appGreen,
               foregroundColor: Colors.white,
@@ -288,13 +320,17 @@ class StudentProfileMobile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            icon: provider.isSaving 
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : const Icon(Icons.edit),
+            icon:
+                provider.isSaving
+                    ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                    : const Icon(Icons.edit),
             label: Text(
               provider.isSaving ? 'Saving...' : 'Edit Profile',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),

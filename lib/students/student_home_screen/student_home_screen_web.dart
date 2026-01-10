@@ -11,7 +11,7 @@ import '../student_notifications/student_notifications.dart';
 import '../student_classes/student_classes.dart';
 import '../student_chat/student_chat.dart';
 import '../student_settings/student_settings.dart';
-import '../../Screens/Auth Screens/login_screen.dart';
+import '../../views/auth_views/login_screen.dart';
 import '../student_profile/student_profile.dart';
 import '../../services/notification_service.dart';
 import 'package:al_mehdi_online_school/teachers/teacher_chat/chats.dart' as teacher_chat;
