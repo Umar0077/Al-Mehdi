@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class TeacherChatMobileProvider extends ChangeNotifier {
   int? selectedChatIndex;
   List<QueryDocumentSnapshot<Map<String, dynamic>>> students = [];
   bool isLoading = true;
   String? error;
-  
+
   // Message state management for fast UI updates
-  Map<String, List<Map<String, dynamic>>> _localMessages = {};
-  Map<String, bool> _sendingMessages = {};
+  final Map<String, List<Map<String, dynamic>>> _localMessages = {};
+  final Map<String, bool> _sendingMessages = {};
 
   TeacherChatMobileProvider() {
     loadAssignedStudents();
@@ -34,7 +34,11 @@ class TeacherChatMobileProvider extends ChangeNotifier {
   }
 
   // Update message status (e.g., from sending to sent)
-  void updateMessageStatus(String chatRoomId, String tempId, Map<String, dynamic> updates) {
+  void updateMessageStatus(
+    String chatRoomId,
+    String tempId,
+    Map<String, dynamic> updates,
+  ) {
     if (_localMessages[chatRoomId] != null) {
       final messageIndex = _localMessages[chatRoomId]!.indexWhere(
         (msg) => msg['tempId'] == tempId,
@@ -66,10 +70,14 @@ class TeacherChatMobileProvider extends ChangeNotifier {
     error = null;
     notifyListeners();
     try {
-      final studentsSnapshot = await FirebaseFirestore.instance
-          .collection('students')
-          .where('assignedTeacherId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .get();
+      final studentsSnapshot =
+          await FirebaseFirestore.instance
+              .collection('students')
+              .where(
+                'assignedTeacherId',
+                isEqualTo: FirebaseAuth.instance.currentUser!.uid,
+              )
+              .get();
       students = studentsSnapshot.docs;
       isLoading = false;
       notifyListeners();
