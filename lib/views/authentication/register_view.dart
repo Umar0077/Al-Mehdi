@@ -57,7 +57,9 @@ class MyDropdown extends StatelessWidget {
 }
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final Map<String, dynamic>? oauthData;
+
+  const RegisterScreen({super.key, this.oauthData});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -70,10 +72,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
 
   String _selectedRole = "Role";
+  bool _isOAuthSignup = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Check if this is OAuth signup and pre-fill fields
+    if (widget.oauthData != null) {
+      _isOAuthSignup = true;
+      _emailController.text = widget.oauthData!['email'] ?? '';
+      _fullNameController.text = widget.oauthData!['fullName'] ?? '';
+      // For OAuth, we don't need password fields
+    }
+
     // Precache images to avoid jank when keyboard opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       precacheImage(const AssetImage('assets/logo/Google.png'), context);
@@ -89,6 +101,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _handleRegistration(AuthProvider authProvider) {
+    // For OAuth signup, we don't need password validation
+    if (_isOAuthSignup) {
+      if (_selectedRole == "Role") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select a role to continue")),
+        );
+        return;
+      }
+
+      // Navigate directly to registration form with OAuth data
+      _navigateToRegistrationForm(
+        email: _emailController.text.trim().toLowerCase(),
+        fullName: _fullNameController.text.trim(),
+      );
+      return;
+    }
+
+    // For regular email/password signup
     final isValid = authProvider.validateRegistrationFields(
       fullName: _fullNameController.text.trim(),
       email: _emailController.text.trim().toLowerCase(),
@@ -260,6 +290,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 false, // Full name field should not be obscured
                             keyboardType: TextInputType.name,
                             textInputAction: TextInputAction.next,
+                            enabled: !_isOAuthSignup, // Disable for OAuth
                           ),
                           const SizedBox(height: 20),
                           CustomTextfield(
@@ -270,25 +301,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 false, // Email field should not be obscured
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
+                            enabled: !_isOAuthSignup, // Disable for OAuth
                           ),
-                          const SizedBox(height: 20),
-                          CustomTextfield(
-                            labelText: 'Password',
-                            width: responsiveWidth,
-                            controller: _passwordController,
-                            obscureText: true,
-                            keyboardType: TextInputType.visiblePassword,
-                            textInputAction: TextInputAction.next,
-                          ),
-                          const SizedBox(height: 20),
-                          CustomTextfield(
-                            labelText: 'Confirm Password',
-                            width: responsiveWidth,
-                            controller: _confirmPasswordController,
-                            obscureText: true,
-                            keyboardType: TextInputType.visiblePassword,
-                            textInputAction: TextInputAction.done,
-                          ),
+                          // Only show password fields for non-OAuth signup
+                          if (!_isOAuthSignup) ...[
+                            const SizedBox(height: 20),
+                            CustomTextfield(
+                              labelText: 'Password',
+                              width: responsiveWidth,
+                              controller: _passwordController,
+                              obscureText: true,
+                              keyboardType: TextInputType.visiblePassword,
+                              textInputAction: TextInputAction.next,
+                            ),
+                            const SizedBox(height: 20),
+                            CustomTextfield(
+                              labelText: 'Confirm Password',
+                              width: responsiveWidth,
+                              controller: _confirmPasswordController,
+                              obscureText: true,
+                              keyboardType: TextInputType.visiblePassword,
+                              textInputAction: TextInputAction.done,
+                            ),
+                          ],
                           const SizedBox(height: 20),
                           MyDropdown(
                             width: responsiveWidth,
@@ -300,34 +335,77 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
                           const SizedBox(height: 30),
+                          // Show OAuth info message if coming from social login
+                          if (_isOAuthSignup) ...[
+                            Container(
+                              width: responsiveWidth,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xff02D185).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color(
+                                    0xff02D185,
+                                  ).withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.info_outline,
+                                    color: Color(0xff02D185),
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      'Complete your ${widget.oauthData?['provider'] == 'google' ? 'Google' : 'Apple'} signup by selecting your role',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xff02D185),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
                           CustomButton(
                             text: 'Next',
                             onPressed: () => _handleRegistration(authProvider),
                             width: responsiveWidth,
                           ),
-                          const SizedBox(height: 20),
-                          if (defaultTargetPlatform == TargetPlatform.android ||
-                              kIsWeb)
-                            SocialLoginButton(
-                              imagePath: 'assets/logo/Google.png',
-                              labelText: 'Continue with Google',
-                              imagePadding: const EdgeInsets.only(left: 15),
-                              width: responsiveWidth,
-                              onPressed:
-                                  () => _handleGoogleRegistration(authProvider),
-                            ),
-                          const SizedBox(height: 10),
-                          if (defaultTargetPlatform == TargetPlatform.iOS ||
-                              kIsWeb)
-                            SocialLoginButton(
-                              imagePath: 'assets/logo/apple.png',
-                              labelText: 'Continue with Apple',
-                              imagePadding: const EdgeInsets.only(left: 10),
-                              width: responsiveWidth,
-                              onPressed:
-                                  () => _handleAppleRegistration(authProvider),
-                            ),
-                          const SizedBox(height: 10),
+                          // Only show social login buttons for non-OAuth signups
+                          if (!_isOAuthSignup) ...[
+                            const SizedBox(height: 20),
+                            if (defaultTargetPlatform ==
+                                    TargetPlatform.android ||
+                                kIsWeb)
+                              SocialLoginButton(
+                                imagePath: 'assets/logo/Google.png',
+                                labelText: 'Continue with Google',
+                                imagePadding: const EdgeInsets.only(left: 15),
+                                width: responsiveWidth,
+                                onPressed:
+                                    () =>
+                                        _handleGoogleRegistration(authProvider),
+                              ),
+                            const SizedBox(height: 10),
+                            if (defaultTargetPlatform == TargetPlatform.iOS ||
+                                kIsWeb)
+                              SocialLoginButton(
+                                imagePath: 'assets/logo/apple.png',
+                                labelText: 'Continue with Apple',
+                                imagePadding: const EdgeInsets.only(left: 10),
+                                width: responsiveWidth,
+                                onPressed:
+                                    () =>
+                                        _handleAppleRegistration(authProvider),
+                              ),
+                            const SizedBox(height: 10),
+                          ] else
+                            const SizedBox(height: 20),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

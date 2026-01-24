@@ -52,6 +52,16 @@ class _LoginViewState extends State<LoginView> {
 
     if (success && mounted) {
       _navigateBasedOnAuthState(authProvider.state);
+    } else if (authProvider.state.needsSignup && mounted) {
+      // User needs to complete signup - redirect to register screen with OAuth data
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) =>
+                  RegisterScreen(oauthData: authProvider.state.oauthSignupData),
+        ),
+      );
     } else if (authProvider.state.errorMessage != null && mounted) {
       _showErrorSnackBar(authProvider.state.errorMessage!);
     }
@@ -62,6 +72,16 @@ class _LoginViewState extends State<LoginView> {
 
     if (success && mounted) {
       _navigateBasedOnAuthState(authProvider.state);
+    } else if (authProvider.state.needsSignup && mounted) {
+      // User needs to complete signup - redirect to register screen with OAuth data
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) =>
+                  RegisterScreen(oauthData: authProvider.state.oauthSignupData),
+        ),
+      );
     } else if (authProvider.state.errorMessage != null && mounted) {
       _showErrorSnackBar(authProvider.state.errorMessage!);
     }

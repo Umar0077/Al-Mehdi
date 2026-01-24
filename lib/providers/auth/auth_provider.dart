@@ -22,6 +22,8 @@ class AuthState {
   final UserRole? userRole;
   final bool isUnassigned;
   final String? adminId; // For admin login
+  final Map<String, dynamic>? oauthSignupData; // OAuth data for signup flow
+  final bool needsSignup; // Flag to indicate user needs to complete signup
 
   const AuthState({
     this.isLoading = false,
@@ -30,6 +32,8 @@ class AuthState {
     this.userRole,
     this.isUnassigned = false,
     this.adminId,
+    this.oauthSignupData,
+    this.needsSignup = false,
   });
 
   AuthState copyWith({
@@ -39,6 +43,8 @@ class AuthState {
     UserRole? userRole,
     bool? isUnassigned,
     String? adminId,
+    Map<String, dynamic>? oauthSignupData,
+    bool? needsSignup,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
@@ -47,6 +53,8 @@ class AuthState {
       userRole: userRole ?? this.userRole,
       isUnassigned: isUnassigned ?? this.isUnassigned,
       adminId: adminId ?? this.adminId,
+      oauthSignupData: oauthSignupData,
+      needsSignup: needsSignup ?? this.needsSignup,
     );
   }
 }
@@ -180,6 +188,28 @@ class AuthProvider extends ChangeNotifier {
       final result = await _checkUserStatusAndRole(user.uid);
 
       if (!result['success']) {
+        // Check if it's an "Account not found" error
+        if (result['message'] == 'Account not found. Please register first.') {
+          // Don't sign out, instead prepare data for signup
+          final oauthData = {
+            'email': user.email ?? '',
+            'fullName': user.displayName ?? '',
+            'provider': 'google',
+            'uid': user.uid,
+          };
+
+          _setState(
+            _state.copyWith(
+              isLoading: false,
+              user: user,
+              oauthSignupData: oauthData,
+              needsSignup: true,
+            ),
+          );
+          return false; // Still return false but with signup data
+        }
+
+        // For other errors (like disabled account), sign out
         await _auth.signOut();
         await _googleSignIn.signOut();
         _setState(
@@ -329,6 +359,36 @@ class AuthProvider extends ChangeNotifier {
       final result = await _checkUserStatusAndRole(user.uid);
 
       if (!result['success']) {
+        // Check if it's an "Account not found" error
+        if (result['message'] == 'Account not found. Please register first.') {
+          // Don't sign out, instead prepare data for signup
+          String displayName = '';
+          if (credential.givenName != null && credential.familyName != null) {
+            displayName = '${credential.givenName} ${credential.familyName}';
+          } else if (user.displayName != null) {
+            displayName = user.displayName!;
+          }
+
+          final oauthData = {
+            'email': user.email ?? '',
+            'fullName': displayName,
+            'provider': 'apple',
+            'uid': user.uid,
+            'appleUserId': credential.userIdentifier,
+          };
+
+          _setState(
+            _state.copyWith(
+              isLoading: false,
+              user: user,
+              oauthSignupData: oauthData,
+              needsSignup: true,
+            ),
+          );
+          return false; // Still return false but with signup data
+        }
+
+        // For other errors (like disabled account), sign out
         await _auth.signOut();
         _setState(
           _state.copyWith(isLoading: false, errorMessage: result['message']),
@@ -338,7 +398,9 @@ class AuthProvider extends ChangeNotifier {
 
       // For Apple sign-in, try to save name if available (first sign-in)
       // This helps when Apple doesn't return name on subsequent logins
-      if (credential.givenName != null || credential.familyName != null || user.email != null) {
+      if (credential.givenName != null ||
+          credential.familyName != null ||
+          user.email != null) {
         String displayName = '';
         if (credential.givenName != null && credential.familyName != null) {
           displayName = '${credential.givenName} ${credential.familyName}';
@@ -347,7 +409,8 @@ class AuthProvider extends ChangeNotifier {
         }
 
         // Only save if we have meaningful data
-        if (displayName.isNotEmpty || (user.email != null && user.email!.isNotEmpty)) {
+        if (displayName.isNotEmpty ||
+            (user.email != null && user.email!.isNotEmpty)) {
           await _saveOAuthUserData(
             uid: user.uid,
             email: user.email ?? '',
@@ -465,11 +528,63 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Sign out
+  /// Sign out - checks provider and signs out properly
   Future<void> signOut() async {
-    await _auth.signOut();
-    await _googleSignIn.signOut();
-    _setState(const AuthState());
+    try {
+      final user = _auth.currentUser;
+
+      if (user != null) {
+        // Check which provider the user is using
+        bool isGoogleUser = false;
+        bool isAppleUser = false;
+
+        for (final providerInfo in user.providerData) {
+          if (providerInfo.providerId == 'google.com') {
+            isGoogleUser = true;
+          } else if (providerInfo.providerId == 'apple.com') {
+            isAppleUser = true;
+          }
+        }
+
+        // Sign out from specific provider
+        if (isGoogleUser) {
+          try {
+            await _googleSignIn.signOut();
+            if (kDebugMode) {
+              print('✅ Signed out from Google');
+            }
+          } catch (e) {
+            if (kDebugMode) {
+              print('⚠️ Error signing out from Google: $e');
+            }
+          }
+        }
+
+        // Note: Apple Sign In doesn't require explicit sign out
+        // The token is revoked when Firebase Auth signs out
+        if (isAppleUser && kDebugMode) {
+          print('✅ Signing out from Apple (via Firebase)');
+        }
+
+        if (!isGoogleUser && !isAppleUser && kDebugMode) {
+          print('✅ Signing out from email/password');
+        }
+      }
+
+      // Always sign out from Firebase Auth
+      await _auth.signOut();
+      _setState(const AuthState());
+
+      if (kDebugMode) {
+        print('✅ Successfully signed out from all providers');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error during sign out: $e');
+      }
+      // Still clear the state even if there's an error
+      _setState(const AuthState());
+    }
   }
 
   /// Send password reset email
@@ -615,9 +730,11 @@ class AuthProvider extends ChangeNotifier {
       }
 
       // Check if user already exists in students or teachers collection
-      final studentDoc = await _firestore.collection('students').doc(user.uid).get();
-      final teacherDoc = await _firestore.collection('teachers').doc(user.uid).get();
-      
+      final studentDoc =
+          await _firestore.collection('students').doc(user.uid).get();
+      final teacherDoc =
+          await _firestore.collection('teachers').doc(user.uid).get();
+
       if (studentDoc.exists || teacherDoc.exists) {
         // User already registered - sign them out and show error
         await _auth.signOut();
@@ -625,7 +742,8 @@ class AuthProvider extends ChangeNotifier {
         _setState(
           _state.copyWith(
             isLoading: false,
-            errorMessage: 'This account is already registered. Please use the login screen to sign in.',
+            errorMessage:
+                'This account is already registered. Please use the login screen to sign in.',
           ),
         );
         return null;
@@ -740,16 +858,19 @@ class AuthProvider extends ChangeNotifier {
       }
 
       // Check if user already exists in students or teachers collection
-      final studentDoc = await _firestore.collection('students').doc(user.uid).get();
-      final teacherDoc = await _firestore.collection('teachers').doc(user.uid).get();
-      
+      final studentDoc =
+          await _firestore.collection('students').doc(user.uid).get();
+      final teacherDoc =
+          await _firestore.collection('teachers').doc(user.uid).get();
+
       if (studentDoc.exists || teacherDoc.exists) {
         // User already registered - sign them out and show error
         await _auth.signOut();
         _setState(
           _state.copyWith(
             isLoading: false,
-            errorMessage: 'This account is already registered. Please use the login screen to sign in.',
+            errorMessage:
+                'This account is already registered. Please use the login screen to sign in.',
           ),
         );
         return null;
