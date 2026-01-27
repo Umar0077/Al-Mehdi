@@ -84,6 +84,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _emailController.text = widget.oauthData!['email'] ?? '';
       _fullNameController.text = widget.oauthData!['fullName'] ?? '';
       // For OAuth, we don't need password fields
+
+      if (kDebugMode) {
+        print('📝 RegisterScreen - OAuth Data Received:');
+        print('  Email: ${widget.oauthData!['email']}');
+        print('  Full Name: ${widget.oauthData!['fullName']}');
+        print('  Provider: ${widget.oauthData!['provider']}');
+      }
+    } else {
+      if (kDebugMode) {
+        print('📝 RegisterScreen - No OAuth data (manual registration)');
+      }
     }
 
     // Precache images to avoid jank when keyboard opens
@@ -379,18 +390,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           // Only show social login buttons for non-OAuth signups
                           if (!_isOAuthSignup) ...[
                             const SizedBox(height: 20),
-                            if (defaultTargetPlatform ==
-                                    TargetPlatform.android ||
-                                kIsWeb)
-                              SocialLoginButton(
-                                imagePath: 'assets/logo/Google.png',
-                                labelText: 'Continue with Google',
-                                imagePadding: const EdgeInsets.only(left: 15),
-                                width: responsiveWidth,
-                                onPressed:
-                                    () =>
-                                        _handleGoogleRegistration(authProvider),
-                              ),
+
+                            SocialLoginButton(
+                              imagePath: 'assets/logo/Google.png',
+                              labelText: 'Continue with Google',
+                              imagePadding: const EdgeInsets.only(left: 15),
+                              width: responsiveWidth,
+                              onPressed:
+                                  () => _handleGoogleRegistration(authProvider),
+                            ),
                             const SizedBox(height: 10),
                             if (defaultTargetPlatform == TargetPlatform.iOS ||
                                 kIsWeb)

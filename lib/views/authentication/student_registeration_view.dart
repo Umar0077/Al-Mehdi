@@ -88,45 +88,51 @@ class _StudentsRegistrationState extends State<StudentsRegistration> {
                           smartDashesType: SmartDashesType.disabled,
                           smartQuotesType: SmartQuotesType.disabled,
                           style: TextStyle(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : Colors.black,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black,
                           ),
                           decoration: InputDecoration(
                             prefixIcon: Icon(
                               Icons.search,
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white70
-                                  : Colors.black54,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white70
+                                      : Colors.black54,
                             ),
                             hintText: 'Search country',
                             hintStyle: TextStyle(
-                              color: Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white54
-                                  : Colors.black45,
+                              color:
+                                  Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white54
+                                      : Colors.black45,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white30
-                                    : Colors.black26,
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white30
+                                        : Colors.black26,
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(
-                                color: Theme.of(context).brightness == Brightness.dark
-                                    ? Colors.white30
-                                    : Colors.black26,
+                                color:
+                                    Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white30
+                                        : Colors.black26,
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(
-                                color: appGreen,
-                                width: 2,
-                              ),
+                              borderSide: BorderSide(color: appGreen, width: 2),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16,
@@ -159,9 +165,11 @@ class _StudentsRegistrationState extends State<StudentsRegistration> {
                               title: Text(
                                 c,
                                 style: TextStyle(
-                                  color: Theme.of(context).brightness == Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black,
                                 ),
                               ),
                               hoverColor: appLightGreen,
@@ -218,11 +226,9 @@ class _StudentsRegistrationState extends State<StudentsRegistration> {
     // Validate email
     final email = _isOAuthUser ? _oauthEmail : widget.email;
     if (email == null || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Email is required'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Email is required')));
       return;
     }
 
@@ -296,21 +302,22 @@ class _StudentsRegistrationState extends State<StudentsRegistration> {
     if (widget.password == null && widget.email != null) {
       _isOAuthUser = true;
       _oauthEmail = widget.email!;
-      
+
       // Determine signup method
-      if (widget.email!.contains('privaterelay.appleid.com')) {
+      if (widget.email!.contains('privaterelay.appleid.com') ||
+          widget.email!.contains('@icloud.com')) {
         _signupMethod = 'apple';
       } else {
         _signupMethod = 'google';
       }
-      
+
       // Pre-fill name if provided
       if (widget.fullName != null && widget.fullName!.isNotEmpty) {
         _fullNameController.text = widget.fullName!;
       }
     }
     _isLoadingOAuthData = false;
-    
+
     // Auto-detect country from IP
     _autoDetectCountry();
   }
@@ -458,7 +465,8 @@ class _StudentsRegistrationState extends State<StudentsRegistration> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Email',
@@ -470,9 +478,7 @@ class _StudentsRegistrationState extends State<StudentsRegistration> {
                                       const SizedBox(height: 4),
                                       Text(
                                         _oauthEmail,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                        ),
+                                        style: const TextStyle(fontSize: 16),
                                       ),
                                     ],
                                   ),

@@ -8,8 +8,7 @@ import 'package:al_mehdi_online_school/views/authentication/auth_view.dart';
 import 'package:al_mehdi_online_school/views/authentication/forgot_password_view.dart';
 import 'package:al_mehdi_online_school/views/authentication/register_view.dart';
 import 'package:al_mehdi_online_school/views/support/support_view.dart';
-import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -50,10 +49,20 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _handleGoogleSignIn(AuthProvider authProvider) async {
     final success = await authProvider.signInWithGoogle();
 
+    if (kDebugMode) {
+      print('🔐 Google Sign In Result:');
+      print('  Success: $success');
+      print('  Needs Signup: ${authProvider.state.needsSignup}');
+      print('  OAuth Data: ${authProvider.state.oauthSignupData}');
+    }
+
     if (success && mounted) {
       _navigateBasedOnAuthState(authProvider.state);
     } else if (authProvider.state.needsSignup && mounted) {
       // User needs to complete signup - redirect to register screen with OAuth data
+      if (kDebugMode) {
+        print('  ➡️ Navigating to RegisterScreen with OAuth data');
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -70,10 +79,20 @@ class _LoginViewState extends State<LoginView> {
   Future<void> _handleAppleSignIn(AuthProvider authProvider) async {
     final success = await authProvider.signInWithApple();
 
+    if (kDebugMode) {
+      print('🔐 Apple Sign In Result:');
+      print('  Success: $success');
+      print('  Needs Signup: ${authProvider.state.needsSignup}');
+      print('  OAuth Data: ${authProvider.state.oauthSignupData}');
+    }
+
     if (success && mounted) {
       _navigateBasedOnAuthState(authProvider.state);
     } else if (authProvider.state.needsSignup && mounted) {
       // User needs to complete signup - redirect to register screen with OAuth data
+      if (kDebugMode) {
+        print('  ➡️ Navigating to RegisterScreen with OAuth data');
+      }
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

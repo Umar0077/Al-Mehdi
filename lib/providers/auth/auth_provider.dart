@@ -67,10 +67,10 @@ class AuthProvider extends ChangeNotifier {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     // iOS client ID from GoogleService-Info.plist
-    // For web, the client ID is set in web/index.html meta tag
+    // For web, specify the OAuth 2.0 Client ID that can issue ID tokens
     clientId:
         kIsWeb
-            ? null // Web uses the clientId from index.html meta tag
+            ? '295791005487-tjq0itcgalq9mg2jbkb39jrp0hs9k7a5.apps.googleusercontent.com' // Web OAuth client ID
             : (Platform.isIOS
                 ? '295791005487-epsbj47r76kp3id081iaj921thttjduc.apps.googleusercontent.com'
                 : null),
@@ -157,27 +157,72 @@ class AuthProvider extends ChangeNotifier {
     _setState(_state.copyWith(isLoading: true, errorMessage: null));
 
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        _setState(_state.copyWith(isLoading: false));
-        return false;
+      late UserCredential userCredential;
+      late User? user;
+      String fullName = '';
+
+      if (kIsWeb) {
+        // On web, use Firebase's signInWithPopup for better ID token handling
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+
+        userCredential = await _auth.signInWithPopup(googleProvider);
+        user = userCredential.user;
+
+        if (user != null) {
+          // Get name from Firebase user
+          fullName = user.displayName ?? '';
+        }
+      } else {
+        // On native platforms, use google_sign_in package
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          _setState(_state.copyWith(isLoading: false));
+          return false;
+        }
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        if (kDebugMode) {
+          print('🔑 Google Auth Tokens Debug:');
+          print(
+            '  accessToken: ${googleAuth.accessToken != null ? "present" : "null"}',
+          );
+          print(
+            '  idToken: ${googleAuth.idToken != null ? "present" : "null"}',
+          );
+        }
+
+        // Ensure we have the required idToken
+        if (googleAuth.idToken == null || googleAuth.idToken!.isEmpty) {
+          if (kDebugMode) {
+            print('❌ No idToken received from Google Sign-In');
+          }
+          _setState(
+            _state.copyWith(
+              isLoading: false,
+              errorMessage:
+                  'Failed to authenticate with Google. Please try again.',
+            ),
+          );
+          return false;
+        }
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        userCredential = await _auth.signInWithCredential(credential);
+        user = userCredential.user;
+
+        if (user != null) {
+          // Get full name from GoogleSignInAccount (most reliable on native)
+          fullName = googleUser.displayName ?? user.displayName ?? '';
+        }
       }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      // Ensure we have required tokens
-      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
-        throw Exception('Failed to get authentication tokens from Google');
-      }
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      final user = userCredential.user;
 
       if (user == null) {
         _setState(_state.copyWith(isLoading: false));
@@ -193,7 +238,7 @@ class AuthProvider extends ChangeNotifier {
           // Don't sign out, instead prepare data for signup
           final oauthData = {
             'email': user.email ?? '',
-            'fullName': user.displayName ?? '',
+            'fullName': fullName,
             'provider': 'google',
             'uid': user.uid,
           };
@@ -211,7 +256,9 @@ class AuthProvider extends ChangeNotifier {
 
         // For other errors (like disabled account), sign out
         await _auth.signOut();
-        await _googleSignIn.signOut();
+        if (!kIsWeb) {
+          await _googleSignIn.signOut();
+        }
         _setState(
           _state.copyWith(isLoading: false, errorMessage: result['message']),
         );
@@ -222,7 +269,7 @@ class AuthProvider extends ChangeNotifier {
       await _saveOAuthUserData(
         uid: user.uid,
         email: user.email ?? '',
-        fullName: user.displayName ?? '',
+        fullName: fullName,
         provider: 'google',
       );
 
@@ -262,14 +309,21 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       if (kDebugMode) {
         print('Google Sign-In Error: ${e.toString()}');
+        if (kIsWeb) {
+          print(
+            'Web Platform - This error can be ignored if it\'s about gapi.client',
+          );
+        }
       }
 
-      _setState(
-        _state.copyWith(
-          isLoading: false,
-          errorMessage: 'Google sign-in failed. Please try again.',
-        ),
-      );
+      // Check if it's just a gapi.client warning (harmless on web)
+      String errorMessage = 'Google sign-in failed. Please try again.';
+      if (e.toString().contains('gapi.client')) {
+        errorMessage =
+            'Google sign-in configuration issue. Please refresh and try again.';
+      }
+
+      _setState(_state.copyWith(isLoading: false, errorMessage: errorMessage));
       return false;
     }
   }
@@ -363,10 +417,36 @@ class AuthProvider extends ChangeNotifier {
         if (result['message'] == 'Account not found. Please register first.') {
           // Don't sign out, instead prepare data for signup
           String displayName = '';
+
+          if (kDebugMode) {
+            print('🍎 Apple Sign-In (New User) Debug:');
+            print('  givenName: ${credential.givenName}');
+            print('  familyName: ${credential.familyName}');
+            print('  user.displayName: ${user.displayName}');
+          }
+
+          // First, try Apple credential (only available on first sign-in)
           if (credential.givenName != null && credential.familyName != null) {
             displayName = '${credential.givenName} ${credential.familyName}';
-          } else if (user.displayName != null) {
+            if (kDebugMode) print('  ✅ Got name from Apple credential');
+          }
+          // Second, try stored OAuth data (critical for subsequent sign-ins)
+          if (displayName.isEmpty) {
+            final storedOAuthData = await getOAuthUserData(user.uid);
+            if (storedOAuthData != null &&
+                storedOAuthData.fullName.isNotEmpty) {
+              displayName = storedOAuthData.fullName;
+              if (kDebugMode) print('  ✅ Got name from stored OAuth data');
+            }
+          }
+          // Third, try Firebase user displayName as final fallback
+          if (displayName.isEmpty && user.displayName != null) {
             displayName = user.displayName!;
+            if (kDebugMode) print('  ✅ Got name from Firebase user');
+          }
+
+          if (kDebugMode) {
+            print('  Final displayName for signup: "$displayName"');
           }
 
           final oauthData = {
@@ -396,30 +476,47 @@ class AuthProvider extends ChangeNotifier {
         return false;
       }
 
-      // For Apple sign-in, try to save name if available (first sign-in)
-      // This helps when Apple doesn't return name on subsequent logins
-      if (credential.givenName != null ||
-          credential.familyName != null ||
-          user.email != null) {
-        String displayName = '';
-        if (credential.givenName != null && credential.familyName != null) {
-          displayName = '${credential.givenName} ${credential.familyName}';
-        } else if (user.displayName != null) {
-          displayName = user.displayName!;
-        }
+      // For Apple sign-in, save/update OAuth data with the best available name
+      String displayName = '';
 
-        // Only save if we have meaningful data
-        if (displayName.isNotEmpty ||
-            (user.email != null && user.email!.isNotEmpty)) {
-          await _saveOAuthUserData(
-            uid: user.uid,
-            email: user.email ?? '',
-            fullName: displayName,
-            provider: 'apple',
-            appleUserId: credential.userIdentifier,
-          );
+      if (kDebugMode) {
+        print('🍎 Apple Sign-In (Existing User) Debug:');
+        print('  givenName: ${credential.givenName}');
+        print('  familyName: ${credential.familyName}');
+        print('  user.displayName: ${user.displayName}');
+      }
+
+      // First, try Apple credential (only available on first sign-in)
+      if (credential.givenName != null && credential.familyName != null) {
+        displayName = '${credential.givenName} ${credential.familyName}';
+        if (kDebugMode) print('  ✅ Got name from Apple credential');
+      }
+      // Second, try stored OAuth data (don't overwrite with empty)
+      if (displayName.isEmpty) {
+        final storedOAuthData = await getOAuthUserData(user.uid);
+        if (storedOAuthData != null && storedOAuthData.fullName.isNotEmpty) {
+          displayName = storedOAuthData.fullName;
+          if (kDebugMode) print('  ✅ Got name from stored OAuth data');
         }
       }
+      // Third, try Firebase user displayName as final fallback
+      if (displayName.isEmpty && user.displayName != null) {
+        displayName = user.displayName!;
+        if (kDebugMode) print('  ✅ Got name from Firebase user');
+      }
+
+      if (kDebugMode) {
+        print('  Final displayName: "$displayName"');
+      }
+
+      // Save/update OAuth data
+      await _saveOAuthUserData(
+        uid: user.uid,
+        email: user.email ?? '',
+        fullName: displayName,
+        provider: 'apple',
+        appleUserId: credential.userIdentifier,
+      );
 
       // Request web notifications after successful login
       if (kIsWeb) {
@@ -708,21 +805,72 @@ class AuthProvider extends ChangeNotifier {
     _setState(_state.copyWith(isLoading: true, errorMessage: null));
 
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        _setState(_state.copyWith(isLoading: false));
-        return null;
+      late UserCredential userCredential;
+      late User? user;
+      String fullName = '';
+
+      if (kIsWeb) {
+        // On web, use Firebase's signInWithPopup for better ID token handling
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        googleProvider.addScope('email');
+        googleProvider.addScope('profile');
+
+        userCredential = await _auth.signInWithPopup(googleProvider);
+        user = userCredential.user;
+
+        if (user != null) {
+          // Get name from Firebase user
+          fullName = user.displayName ?? '';
+        }
+      } else {
+        // On native platforms, use google_sign_in package
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          _setState(_state.copyWith(isLoading: false));
+          return null;
+        }
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        if (kDebugMode) {
+          print('🔑 Google Auth Tokens Debug (Registration):');
+          print(
+            '  accessToken: ${googleAuth.accessToken != null ? "present" : "null"}',
+          );
+          print(
+            '  idToken: ${googleAuth.idToken != null ? "present" : "null"}',
+          );
+        }
+
+        // Ensure we have the required idToken
+        if (googleAuth.idToken == null || googleAuth.idToken!.isEmpty) {
+          if (kDebugMode) {
+            print('❌ No idToken received from Google Sign-In');
+          }
+          _setState(
+            _state.copyWith(
+              isLoading: false,
+              errorMessage:
+                  'Failed to authenticate with Google. Please try again.',
+            ),
+          );
+          return null;
+        }
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        userCredential = await _auth.signInWithCredential(credential);
+        user = userCredential.user;
+
+        if (user != null) {
+          // Get full name from GoogleSignInAccount (most reliable on native)
+          fullName = googleUser.displayName ?? user.displayName ?? '';
+        }
       }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final userCredential = await _auth.signInWithCredential(credential);
-      final user = userCredential.user;
 
       if (user == null) {
         _setState(_state.copyWith(isLoading: false));
@@ -738,7 +886,9 @@ class AuthProvider extends ChangeNotifier {
       if (studentDoc.exists || teacherDoc.exists) {
         // User already registered - sign them out and show error
         await _auth.signOut();
-        await _googleSignIn.signOut();
+        if (!kIsWeb) {
+          await _googleSignIn.signOut();
+        }
         _setState(
           _state.copyWith(
             isLoading: false,
@@ -749,11 +899,19 @@ class AuthProvider extends ChangeNotifier {
         return null;
       }
 
+      // Get full name - prioritize what we already have, then stored OAuth data
+      if (fullName.isEmpty) {
+        final storedOAuthData = await getOAuthUserData(user.uid);
+        if (storedOAuthData != null && storedOAuthData.fullName.isNotEmpty) {
+          fullName = storedOAuthData.fullName;
+        }
+      }
+
       // Save OAuth data to Firestore for future reference
       await _saveOAuthUserData(
         uid: user.uid,
         email: user.email ?? '',
-        fullName: user.displayName ?? '',
+        fullName: fullName,
         provider: 'google',
       );
 
@@ -761,7 +919,7 @@ class AuthProvider extends ChangeNotifier {
 
       return {
         'email': user.email ?? '',
-        'fullName': user.displayName ?? '',
+        'fullName': fullName,
         'uid': user.uid,
         'provider': 'google',
       };
@@ -833,6 +991,7 @@ class AuthProvider extends ChangeNotifier {
         credential = await SignInWithApple.getAppleIDCredential(
           scopes: [
             AppleIDAuthorizationScopes.email,
+
             AppleIDAuthorizationScopes.fullName,
           ],
         );
@@ -876,12 +1035,38 @@ class AuthProvider extends ChangeNotifier {
         return null;
       }
 
-      // Get display name from Apple ID credential
+      // Get display name from Apple ID credential, stored data, or Firebase user
       String displayName = '';
+
+      if (kDebugMode) {
+        print('🍎 Apple Registration Debug:');
+        print('  givenName: ${credential.givenName}');
+        print('  familyName: ${credential.familyName}');
+        print('  user.displayName: ${user.displayName}');
+        print('  email: ${credential.email}');
+      }
+
+      // First, try to get from Apple credential (only available on first sign-in)
       if (credential.givenName != null && credential.familyName != null) {
         displayName = '${credential.givenName} ${credential.familyName}';
-      } else if (user.displayName != null) {
+        if (kDebugMode) print('  ✅ Got name from Apple credential');
+      }
+      // Second, try stored OAuth data (critical for subsequent sign-ins)
+      if (displayName.isEmpty) {
+        final storedOAuthData = await getOAuthUserData(user.uid);
+        if (storedOAuthData != null && storedOAuthData.fullName.isNotEmpty) {
+          displayName = storedOAuthData.fullName;
+          if (kDebugMode) print('  ✅ Got name from stored OAuth data');
+        }
+      }
+      // Third, try Firebase user displayName as final fallback
+      if (displayName.isEmpty && user.displayName != null) {
         displayName = user.displayName!;
+        if (kDebugMode) print('  ✅ Got name from Firebase user');
+      }
+
+      if (kDebugMode) {
+        print('  Final displayName: "$displayName"');
       }
 
       // Save OAuth data to Firestore for future reference
@@ -1295,7 +1480,6 @@ class AuthProvider extends ChangeNotifier {
       if (existingDoc.exists) {
         // Update only if we have new data (name or email is not empty)
         if (fullName.isNotEmpty || email.isNotEmpty) {
-          final existingData = existingDoc.data()!;
           await _firestore.collection('oauth_users').doc(uid).update({
             if (fullName.isNotEmpty) 'fullName': fullName,
             if (email.isNotEmpty) 'email': email,
