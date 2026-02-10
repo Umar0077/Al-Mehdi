@@ -375,10 +375,8 @@ class AuthProvider extends ChangeNotifier {
             AppleIDAuthorizationScopes.fullName,
           ],
           webAuthenticationOptions: WebAuthenticationOptions(
-            clientId: 'com.almehdi.onlineschool.web',
-            redirectUri: Uri.parse(
-              'https://sample-firebase-ai-app-456c6.firebaseapp.com/__/auth/handler',
-            ),
+            clientId: 'com.almehdi.onlineschool',
+            redirectUri: Uri.parse('https://app.almehdi.org/__/auth/handler'),
           ),
         );
       } else {

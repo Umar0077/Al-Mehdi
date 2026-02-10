@@ -125,10 +125,10 @@ class _MobileRedirectViewState extends State<MobileRedirectView>
     MobileRedirectWebHelper.openWindow(storeUrl, '_blank');
   }
 
-  void _continueToWeb() {
-    // Navigate to the main web app
-    Navigator.of(context).pushReplacementNamed('/');
-  }
+  // void _continueToWeb() {
+  //   // Navigate to the main web app
+  //   Navigator.of(context).pushReplacementNamed('/');
+  // }
 
   @override
   void dispose() {
@@ -288,20 +288,6 @@ class _MobileRedirectViewState extends State<MobileRedirectView>
                   _isAndroid ? 'Get it on Play Store' : 'Download on App Store',
               onPressed: _openStore,
               isPrimary: false,
-            ),
-            const SizedBox(height: 24),
-
-            // Continue to Web Link
-            TextButton(
-              onPressed: _continueToWeb,
-              child: Text(
-                'Continue to web version',
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
             ),
 
             const Spacer(),
