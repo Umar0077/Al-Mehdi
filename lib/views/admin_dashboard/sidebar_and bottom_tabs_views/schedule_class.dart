@@ -73,6 +73,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
             final textColor = isDark ? Colors.white : Colors.black;
             Widget teacherDropdown = DropdownButtonFormField<String>(
               dropdownColor: dropdownColor,
+              isExpanded: true,
               icon: const Icon(Icons.arrow_drop_down, color: appGreen),
               decoration: InputDecoration(
                 labelText: 'Teacher',
@@ -121,43 +122,262 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                 ),
               );
             } else {
-              studentDropdown = DropdownButtonFormField<String>(
-                dropdownColor: dropdownColor,
-                icon: const Icon(Icons.arrow_drop_down, color: appGreen),
-                decoration: InputDecoration(
-                  labelText: 'Student',
-                  labelStyle: TextStyle(fontSize: 15, color: textColor),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.grey),
+              final selectedStudent = provider.selectedStudentId != null
+                  ? provider.filteredStudents.firstWhere(
+                      (s) => s['uid'] == provider.selectedStudentId,
+                      orElse: () => {},
+                    )
+                  : null;
+              final selectedStudentName =
+                  (selectedStudent != null && selectedStudent.isNotEmpty)
+                      ? selectedStudent['name'] as String
+                      : null;
+
+              studentDropdown = GestureDetector(
+                onTap: () async {
+                  String? tempSelected = provider.selectedStudentId;
+                  String searchQuery = '';
+                  await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (ctx) {
+                      return StatefulBuilder(
+                        builder: (ctx, setSheetState) {
+                          final allStudents = provider.filteredStudents;
+                          final filtered = allStudents
+                              .where((s) => (s['name'] as String)
+                                  .toLowerCase()
+                                  .contains(searchQuery.toLowerCase()))
+                              .toList();
+                          return Container(
+                            height: MediaQuery.of(ctx).size.height * 0.75,
+                            decoration: BoxDecoration(
+                              color: isDark ? darkBackground : Colors.white,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(20),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                // Handle bar
+                                Container(
+                                  margin: const EdgeInsets.only(top: 12),
+                                  width: 40,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade400,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                                // Header row with title and action buttons
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                      16, 16, 16, 8),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          'Select Student',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: textColor,
+                                          ),
+                                        ),
+                                      ),
+                                      // Cross button
+                                      GestureDetector(
+                                        onTap: () => Navigator.pop(ctx),
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade50,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.close,
+                                            color: Colors.red,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      // Tick button
+                                      GestureDetector(
+                                        onTap: () {
+                                          provider.setSelectedStudentId(
+                                              tempSelected);
+                                          Navigator.pop(ctx);
+                                        },
+                                        child: Container(
+                                          width: 40,
+                                          height: 40,
+                                          decoration: const BoxDecoration(
+                                            color: appLightGreen,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.check,
+                                            color: appGreen,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                // Search field
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      hintText: 'Search student...',
+                                      hintStyle: TextStyle(
+                                          color: Colors.grey.shade500),
+                                      prefixIcon: const Icon(Icons.search,
+                                          color: appGreen),
+                                      filled: true,
+                                      fillColor: isDark
+                                          ? Colors.grey.shade900
+                                          : Colors.grey.shade100,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 0, horizontal: 16),
+                                      border: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    style: TextStyle(color: textColor),
+                                    onChanged: (val) =>
+                                        setSheetState(() => searchQuery = val),
+                                  ),
+                                ),
+                                const Divider(height: 1),
+                                // Student list
+                                Expanded(
+                                  child: filtered.isEmpty
+                                      ? Center(
+                                          child: Text(
+                                            'No students found.',
+                                            style: TextStyle(
+                                                color: Colors.grey.shade500),
+                                          ),
+                                        )
+                                      : ListView.builder(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 8),
+                                          itemCount: filtered.length,
+                                          itemBuilder: (_, i) {
+                                            final student = filtered[i];
+                                            final uid =
+                                                student['uid'] as String;
+                                            final name =
+                                                student['name'] as String;
+                                            final isSelected =
+                                                tempSelected == uid;
+                                            return InkWell(
+                                              onTap: () => setSheetState(() =>
+                                                  tempSelected =
+                                                      isSelected ? null : uid),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 16,
+                                                        vertical: 4),
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      width: 24,
+                                                      height: 24,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        border: Border.all(
+                                                          color: isSelected
+                                                              ? appGreen
+                                                              : Colors
+                                                                  .grey.shade400,
+                                                          width: 2,
+                                                        ),
+                                                        color: isSelected
+                                                            ? appGreen
+                                                            : Colors.transparent,
+                                                      ),
+                                                      child: isSelected
+                                                          ? const Icon(
+                                                              Icons.check,
+                                                              size: 14,
+                                                              color:
+                                                                  Colors.white,
+                                                            )
+                                                          : null,
+                                                    ),
+                                                    const SizedBox(width: 14),
+                                                    Expanded(
+                                                      child: Text(
+                                                        name,
+                                                        style: TextStyle(
+                                                          fontSize: 15,
+                                                          color: textColor,
+                                                          fontWeight: isSelected
+                                                              ? FontWeight.w600
+                                                              : FontWeight
+                                                                  .normal,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: provider.selectedStudentId != null
+                          ? appGreen
+                          : Colors.grey,
+                    ),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: appGreen),
-                    borderRadius: BorderRadius.circular(10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          selectedStudentName ?? 'Select Student',
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: selectedStudentName != null
+                                ? textColor
+                                : Colors.grey.shade500,
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: provider.selectedStudentId != null
+                            ? appGreen
+                            : Colors.grey,
+                      ),
+                    ],
                   ),
                 ),
-                style: TextStyle(fontSize: 15, color: textColor),
-                items: [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(
-                      'Select Student',
-                      style: TextStyle(fontSize: 15, color: textColor),
-                    ),
-                  ),
-                  ...provider.filteredStudents.map<DropdownMenuItem<String>>(
-                    (s) => DropdownMenuItem<String>(
-                      value: s['uid'] as String,
-                      child: Text(
-                        s['name'] as String,
-                        style: TextStyle(fontSize: 15, color: textColor),
-                      ),
-                    ),
-                  ),
-                ],
-                onChanged: (val) {
-                  provider.setSelectedStudentId(val);
-                },
               );
             }
             Widget dateField = TextFields(
@@ -190,6 +410,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
             // Schedule Type Dropdown
             Widget scheduleTypeDropdown = DropdownButtonFormField<String>(
               dropdownColor: dropdownColor,
+              isExpanded: true,
               icon: const Icon(Icons.arrow_drop_down, color: appGreen),
               decoration: InputDecoration(
                 labelText: 'Schedule Type (Optional)',
@@ -228,6 +449,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
             // Duration Dropdown
             Widget durationDropdown = DropdownButtonFormField<String>(
               dropdownColor: dropdownColor,
+              isExpanded: true,
               icon: const Icon(Icons.arrow_drop_down, color: appGreen),
               decoration: InputDecoration(
                 labelText: 'Duration (Optional)',
@@ -438,7 +660,24 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                                       children: [
                                         Expanded(child: teacherDropdown),
                                         const SizedBox(width: 25),
-                                        Expanded(child: studentDropdown),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Student',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: textColor,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              studentDropdown,
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
                                     const SizedBox(height: 20),
@@ -510,6 +749,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                                             String
                                           >(
                                             dropdownColor: dropdownColor,
+                                            isExpanded: true,
                                             icon: const Icon(
                                               Icons.arrow_drop_down,
                                               color: appGreen,
@@ -576,6 +816,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                                             String
                                           >(
                                             dropdownColor: dropdownColor,
+                                            isExpanded: true,
                                             icon: const Icon(
                                               Icons.arrow_drop_down,
                                               color: appGreen,
@@ -919,7 +1160,21 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                           children: [
                             teacherDropdown,
                             const SizedBox(height: 20),
-                            studentDropdown,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Student',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: textColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                studentDropdown,
+                              ],
+                            ),
                             const SizedBox(height: 20),
                             dateField,
                             const SizedBox(height: 20),
@@ -976,6 +1231,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                             const SizedBox(height: 16),
                             DropdownButtonFormField<String>(
                               dropdownColor: dropdownColor,
+                              isExpanded: true,
                               icon: const Icon(
                                 Icons.arrow_drop_down,
                                 color: appGreen,
@@ -1020,6 +1276,7 @@ class _ScheduleClassContentState extends State<ScheduleClassContent> {
                             const SizedBox(height: 20),
                             DropdownButtonFormField<String>(
                               dropdownColor: dropdownColor,
+                              isExpanded: true,
                               icon: const Icon(
                                 Icons.arrow_drop_down,
                                 color: appGreen,
@@ -1435,6 +1692,7 @@ class DropdownField extends StatelessWidget {
             : appLightGreen;
     return DropdownButtonFormField<String>(
       dropdownColor: dropdownColor,
+      isExpanded: true,
       icon: Icon(Icons.arrow_drop_down, color: appGreen),
       hint: Text(label, style: TextStyle(fontSize: 15, color: Colors.black)),
       style: TextStyle(color: Colors.black),

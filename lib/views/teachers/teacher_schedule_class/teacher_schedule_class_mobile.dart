@@ -151,72 +151,394 @@ class TeacherScheduleClassMobile extends StatelessWidget {
                                 height:
                                     MediaQuery.of(context).size.height * 0.008,
                               ),
-                              DropdownButtonFormField<String>(
-                                items:
-                                    provider.assignedStudents
-                                        .map(
-                                          (student) => DropdownMenuItem<String>(
-                                            value: student['id'] as String,
-                                            child: Flexible(
-                                              child: Text(
-                                                student['name'] ?? '',
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      MediaQuery.of(
-                                                                context,
-                                                              ).size.width <
-                                                              400
-                                                          ? 13
-                                                          : 15,
+                              Builder(
+                                builder: (context) {
+                                  final isDark =
+                                      Theme.of(context).brightness ==
+                                      Brightness.dark;
+                                  final textColor =
+                                      isDark ? Colors.white : Colors.black;
+                                  final selectedStudent =
+                                      provider.selectedStudentId != null
+                                          ? provider.assignedStudents
+                                              .cast<Map<String, dynamic>?>()
+                                              .firstWhere(
+                                                (s) =>
+                                                    s != null &&
+                                                    s['id'] ==
+                                                        provider.selectedStudentId,
+                                                orElse: () => null,
+                                              )
+                                          : null;
+                                  final selectedName = selectedStudent != null
+                                      ? selectedStudent['name'] as String?
+                                      : null;
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      String? tempSelected =
+                                          provider.selectedStudentId;
+                                      String searchQuery = '';
+                                      await showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (ctx) {
+                                          return StatefulBuilder(
+                                            builder: (ctx, setSheetState) {
+                                              final allStudents =
+                                                  provider.assignedStudents;
+                                              final filtered = allStudents
+                                                  .where(
+                                                    (s) => ((s['name']
+                                                                as String?) ??
+                                                            '')
+                                                        .toLowerCase()
+                                                        .contains(
+                                                          searchQuery
+                                                              .toLowerCase(),
+                                                        ),
+                                                  )
+                                                  .toList();
+                                              return Container(
+                                                height: MediaQuery.of(
+                                                      ctx,
+                                                    ).size.height *
+                                                    0.75,
+                                                decoration: BoxDecoration(
+                                                  color: isDark
+                                                      ? darkBackground
+                                                      : Colors.white,
+                                                  borderRadius:
+                                                      const BorderRadius.vertical(
+                                                        top: Radius.circular(20),
+                                                      ),
                                                 ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 2,
+                                                child: Column(
+                                                  children: [
+                                                    // Handle bar
+                                                    Container(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                            top: 12,
+                                                          ),
+                                                      width: 40,
+                                                      height: 4,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .grey.shade400,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              2,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    // Header
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.fromLTRB(
+                                                            16,
+                                                            16,
+                                                            16,
+                                                            8,
+                                                          ),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: Text(
+                                                              'Select Student',
+                                                              style: TextStyle(
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color:
+                                                                    textColor,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          // Cross button
+                                                          GestureDetector(
+                                                            onTap: () =>
+                                                                Navigator.pop(
+                                                                  ctx,
+                                                                ),
+                                                            child: Container(
+                                                              width: 40,
+                                                              height: 40,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                    color: Colors
+                                                                        .red
+                                                                        .shade50,
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                  ),
+                                                              child: const Icon(
+                                                                Icons.close,
+                                                                color:
+                                                                    Colors.red,
+                                                                size: 20,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 10,
+                                                          ),
+                                                          // Tick button
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              provider
+                                                                  .onStudentChanged(
+                                                                    tempSelected,
+                                                                  );
+                                                              Navigator.pop(
+                                                                ctx,
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              width: 40,
+                                                              height: 40,
+                                                              decoration:
+                                                                  const BoxDecoration(
+                                                                    color:
+                                                                        appLightGreen,
+                                                                    shape: BoxShape
+                                                                        .circle,
+                                                                  ),
+                                                              child: const Icon(
+                                                                Icons.check,
+                                                                color: appGreen,
+                                                                size: 20,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    // Search field
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 16,
+                                                        vertical: 8,
+                                                      ),
+                                                      child: TextField(
+                                                        decoration:
+                                                            InputDecoration(
+                                                              hintText:
+                                                                  'Search student...',
+                                                              hintStyle: TextStyle(
+                                                                color: Colors
+                                                                    .grey
+                                                                    .shade500,
+                                                              ),
+                                                              prefixIcon:
+                                                                  const Icon(
+                                                                    Icons.search,
+                                                                    color:
+                                                                        appGreen,
+                                                                  ),
+                                                              filled: true,
+                                                              fillColor: isDark
+                                                                  ? Colors.grey
+                                                                      .shade900
+                                                                  : Colors.grey
+                                                                      .shade100,
+                                                              contentPadding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    vertical: 0,
+                                                                    horizontal:
+                                                                        16,
+                                                                  ),
+                                                              border:
+                                                                  OutlineInputBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                          12,
+                                                                        ),
+                                                                    borderSide:
+                                                                        BorderSide.none,
+                                                                  ),
+                                                            ),
+                                                        style: TextStyle(
+                                                          color: textColor,
+                                                        ),
+                                                        onChanged: (val) =>
+                                                            setSheetState(
+                                                              () =>
+                                                                  searchQuery =
+                                                                      val,
+                                                            ),
+                                                      ),
+                                                    ),
+                                                    const Divider(height: 1),
+                                                    // Student list
+                                                    Expanded(
+                                                      child: filtered.isEmpty
+                                                          ? Center(
+                                                              child: Text(
+                                                                'No students found.',
+                                                                style: TextStyle(
+                                                                  color: Colors
+                                                                      .grey
+                                                                      .shade500,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : ListView.builder(
+                                                              padding:
+                                                                  const EdgeInsets.symmetric(
+                                                                    vertical: 8,
+                                                                  ),
+                                                              itemCount:
+                                                                  filtered
+                                                                      .length,
+                                                              itemBuilder:
+                                                                  (_, i) {
+                                                                    final student =
+                                                                        filtered[i];
+                                                                    final uid =
+                                                                        student['id']
+                                                                            as String;
+                                                                    final name =
+                                                                        (student['name']
+                                                                                as String?) ??
+                                                                            '';
+                                                                    final isSelected =
+                                                                        tempSelected ==
+                                                                        uid;
+                                                                    return InkWell(
+                                                                      onTap: () =>
+                                                                          setSheetState(
+                                                                            () =>
+                                                                                tempSelected =
+                                                                                    isSelected
+                                                                                        ? null
+                                                                                        : uid,
+                                                                          ),
+                                                                      child:
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.symmetric(
+                                                                              horizontal:
+                                                                                  16,
+                                                                              vertical:
+                                                                                  4,
+                                                                            ),
+                                                                            child:
+                                                                                Row(
+                                                                                  children: [
+                                                                                    Container(
+                                                                                      width:
+                                                                                          24,
+                                                                                      height:
+                                                                                          24,
+                                                                                      decoration:
+                                                                                          BoxDecoration(
+                                                                                            shape:
+                                                                                                BoxShape.circle,
+                                                                                            border:
+                                                                                                Border.all(
+                                                                                                  color: isSelected
+                                                                                                      ? appGreen
+                                                                                                      : Colors.grey.shade400,
+                                                                                                  width:
+                                                                                                      2,
+                                                                                                ),
+                                                                                            color: isSelected
+                                                                                                ? appGreen
+                                                                                                : Colors.transparent,
+                                                                                          ),
+                                                                                      child: isSelected
+                                                                                          ? const Icon(
+                                                                                              Icons.check,
+                                                                                              size:
+                                                                                                  14,
+                                                                                              color:
+                                                                                                  Colors.white,
+                                                                                            )
+                                                                                          : null,
+                                                                                    ),
+                                                                                    const SizedBox(
+                                                                                      width:
+                                                                                          14,
+                                                                                    ),
+                                                                                    Expanded(
+                                                                                      child:
+                                                                                          Text(
+                                                                                            name,
+                                                                                            style:
+                                                                                                TextStyle(
+                                                                                                  fontSize:
+                                                                                                      15,
+                                                                                                  color:
+                                                                                                      textColor,
+                                                                                                  fontWeight: isSelected
+                                                                                                      ? FontWeight.w600
+                                                                                                      : FontWeight.normal,
+                                                                                                ),
+                                                                                          ),
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                          ),
+                                                                    );
+                                                                  },
+                                                            ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                        vertical: 16,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color:
+                                              provider.selectedStudentId != null
+                                                  ? appGreen
+                                                  : Colors.grey,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              selectedName ??
+                                                  'Select Student',
+                                              style: TextStyle(
+                                                fontSize: MediaQuery.of(
+                                                          context,
+                                                        ).size.width <
+                                                        400
+                                                    ? 13
+                                                    : 15,
+                                                color: selectedName != null
+                                                    ? textColor
+                                                    : Colors.grey.shade500,
                                               ),
                                             ),
                                           ),
-                                        )
-                                        .toList(),
-                                onChanged: provider.onStudentChanged,
-                                dropdownColor: dropdownColor,
-                                isExpanded: true,
-                                decoration: InputDecoration(
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                      color: Colors.grey,
+                                          Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            color:
+                                                provider.selectedStudentId !=
+                                                        null
+                                                    ? appGreen
+                                                    : Colors.grey,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: const BorderSide(
-                                      color: appGreen,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal:
-                                        MediaQuery.of(context).size.width *
-                                        0.03,
-                                    vertical:
-                                        MediaQuery.of(context).size.height *
-                                        0.015,
-                                  ),
-                                ),
-                                hint: Text(
-                                  'Select Student',
-                                  style: TextStyle(
-                                    fontSize:
-                                        MediaQuery.of(context).size.width < 400
-                                            ? 13
-                                            : 15,
-                                    fontWeight: FontWeight.w400,
-                                    color:
-                                        Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? Colors.white
-                                            : Colors.black,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                  );
+                                },
                               ),
                               SizedBox(
                                 height:
@@ -290,21 +612,18 @@ class TeacherScheduleClassMobile extends StatelessWidget {
                                         .map(
                                           (option) => DropdownMenuItem<String>(
                                             value: option['value'],
-                                            child: Flexible(
-                                              child: Text(
-                                                option['label'] ?? '',
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      MediaQuery.of(
-                                                                context,
-                                                              ).size.width <
-                                                              400
-                                                          ? 13
-                                                          : 15,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 2,
+                                            child: Text(
+                                              option['label'] ?? '',
+                                              style: TextStyle(
+                                                fontSize:
+                                                    MediaQuery.of(
+                                                              context,
+                                                            ).size.width <
+                                                            400
+                                                        ? 13
+                                                        : 15,
                                               ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         )
@@ -373,21 +692,18 @@ class TeacherScheduleClassMobile extends StatelessWidget {
                                         .map(
                                           (option) => DropdownMenuItem<String>(
                                             value: option['value'],
-                                            child: Flexible(
-                                              child: Text(
-                                                option['label'] ?? '',
-                                                style: TextStyle(
-                                                  fontSize:
-                                                      MediaQuery.of(
-                                                                context,
-                                                              ).size.width <
-                                                              400
-                                                          ? 13
-                                                          : 15,
-                                                ),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 2,
+                                            child: Text(
+                                              option['label'] ?? '',
+                                              style: TextStyle(
+                                                fontSize:
+                                                    MediaQuery.of(
+                                                              context,
+                                                            ).size.width <
+                                                            400
+                                                        ? 13
+                                                        : 15,
                                               ),
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         )

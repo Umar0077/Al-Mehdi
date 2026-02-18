@@ -160,6 +160,7 @@ class TeacherScheduleClassWeb extends StatelessWidget {
                                           ),
                                           const SizedBox(height: 10),
                                           DropdownButtonFormField<String>(
+                                            isExpanded: true,
                                             items:
                                                 provider.assignedStudents
                                                     .map(
@@ -356,6 +357,7 @@ class TeacherScheduleClassWeb extends StatelessWidget {
                                           ),
                                           const SizedBox(height: 10),
                                           DropdownButtonFormField<String>(
+                                            isExpanded: true,
                                             items:
                                                 provider.scheduleTypeOptions
                                                     .map(
@@ -484,6 +486,7 @@ class TeacherScheduleClassWeb extends StatelessWidget {
                                           ),
                                           const SizedBox(height: 10),
                                           DropdownButtonFormField<String>(
+                                            isExpanded: true,
                                             items:
                                                 provider.durationOptions
                                                     .map(

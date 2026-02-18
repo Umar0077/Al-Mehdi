@@ -181,6 +181,7 @@ class DropdownField extends StatelessWidget {
     final labelColor = isDark ? Colors.white : Colors.black;
     return DropdownButtonFormField<String>(
       dropdownColor: appLightGreen,
+      isExpanded: true,
       icon: const Icon(Icons.arrow_drop_down, color: appGreen),
       hint: Text(label, style: TextStyle(fontSize: 15, color: labelColor)),
       style: TextStyle(fontSize: 15, color: labelColor),

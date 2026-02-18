@@ -253,47 +253,64 @@ class ScheduleClassProvider extends ChangeNotifier {
   }
 
   Future<void> fetchTeachersAndStudents() async {
-    final teacherSnap =
-        await FirebaseFirestore.instance.collection('teachers').get();
-    final studentSnap =
-        await FirebaseFirestore.instance.collection('students').get();
-    teachers =
-        teacherSnap.docs
-            .map(
-              (doc) => {
-                'uid': doc.id,
-                'name': doc['fullName'],
-                'fcmTokens': List<String>.from(doc.data()['fcmTokens'] ?? []),
-                'assignedStudentIds': List<String>.from(
-                  doc.data()['assignedStudentIds'] ?? [],
-                ),
-              },
-            )
-            .toList();
-    students =
-        studentSnap.docs
-            .map(
-              (doc) => {
-                'uid': doc.id,
-                'name': doc['fullName'],
-                'fcmTokens': List<String>.from(doc.data()['fcmTokens'] ?? []),
-                'assignedTeacherId': doc['assignedTeacherId'],
-              },
-            )
-            .toList();
+    try {
+      final teacherSnap =
+          await FirebaseFirestore.instance.collection('teachers').get();
+      final studentSnap =
+          await FirebaseFirestore.instance.collection('students').get();
+      teachers =
+          teacherSnap.docs
+              .map((doc) {
+                try {
+                  final data = doc.data();
+                  return {
+                    'uid': doc.id,
+                    'name': (data['fullName'] as String?) ?? '',
+                    'fcmTokens': List<String>.from(data['fcmTokens'] ?? []),
+                    'assignedStudentIds': List<String>.from(
+                      data['assignedStudentIds'] ?? [],
+                    ),
+                  };
+                } catch (_) {
+                  return <String, dynamic>{};
+                }
+              })
+              .where((t) => (t['name'] as String?)?.isNotEmpty == true)
+              .toList();
+      students =
+          studentSnap.docs
+              .map((doc) {
+                try {
+                  final data = doc.data();
+                  return {
+                    'uid': doc.id,
+                    'name': (data['fullName'] as String?) ?? '',
+                    'fcmTokens': List<String>.from(data['fcmTokens'] ?? []),
+                    'assignedTeacherId':
+                        (data['assignedTeacherId'] as String?) ?? '',
+                  };
+                } catch (_) {
+                  return <String, dynamic>{};
+                }
+              })
+              .where((s) => (s['name'] as String?)?.isNotEmpty == true)
+              .toList();
 
-    // Build FCM tokens map
-    for (final teacher in teachers) {
-      final teacherId = teacher['uid'] as String;
-      fcmTokens[teacherId] = List<String>.from(teacher['fcmTokens'] ?? []);
+      // Build FCM tokens map
+      for (final teacher in teachers) {
+        final teacherId = teacher['uid'] as String;
+        fcmTokens[teacherId] = List<String>.from(teacher['fcmTokens'] ?? []);
+      }
+      for (final student in students) {
+        final studentId = student['uid'] as String;
+        fcmTokens[studentId] = List<String>.from(student['fcmTokens'] ?? []);
+      }
+    } catch (e) {
+      print('❌ Error fetching teachers and students: $e');
+    } finally {
+      isLoading = false;
+      notifyListeners();
     }
-    for (final student in students) {
-      final studentId = student['uid'] as String;
-      fcmTokens[studentId] = List<String>.from(student['fcmTokens'] ?? []);
-    }
-
-    isLoading = false;
-    notifyListeners();
   }
 
   Future<void> loadScheduledClasses() async {
